@@ -91,7 +91,7 @@ const Idea = () => {
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             placeholder="e.g. AI-based video recruitment and assessment tool"
             value={ideaTitle}
-            onChange={(e)=> setideaTitle(e.target.value)} 
+            onChange={(e)=> setIdeaTitle(e.target.value)} 
           />
         </div>
 
@@ -106,7 +106,7 @@ const Idea = () => {
             placeholder="e.g., Improving recruitment efficiency with advanced tools for modern hiring challenges."
             required
             value={ideaInfo}
-            onChange={(e)=> setideaInfo(e.target.value)} 
+            onChange={(e)=> setIdeaInfo(e.target.value)} 
 
           />
           <p className="mt-2 text-sm text-gray-500">*Max word 15 words</p>
