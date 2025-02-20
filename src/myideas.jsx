@@ -1,35 +1,43 @@
 import React, { useEffect, useState } from "react";
 import { Search } from "lucide-react"; 
-import { NavLink } from "react-router-dom"; // Import NavLink for navigation
-import { toast } from "react-toastify"; // Import Toastify
-import "react-toastify/dist/ReactToastify.css"; // Import Toastify styles
+import { NavLink } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import JobCard from "./jobcard";
 import Sidebar from "./assets/sidebar";
 import Header from "./assets/header";
-
-// Initialize Toastify
-// toast.configure();
+import IdeaCard from "./ideacard";
 
 const Myideas = () => {
   const [IdeaList, setIdeaList] = useState([]);
+  const [acceptedList, setAcceptedList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
   const role = localStorage.getItem("userRole");
   const userId = localStorage.getItem("userId");
 
   useEffect(() => {
-    fetchIdeas(); // Initial data fetch
+    if (role === "Founder") {
+      fetchIdeas();
+    } else if (role === "Talent") {
+      fetchAcceptedIdeas();
+    }
   }, []);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      fetchIdeas(searchQuery);
+      if (role === "Founder") {
+        fetchIdeas(searchQuery);
+      } else if (role === "Talent") {
+        fetchAcceptedIdeas(searchQuery);
+      }
     }, 500);
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery]);
 
+  // Fetch Active Ideas for Founder
   const fetchIdeas = async (query = "") => {
     try {
       const url = query.trim()
@@ -37,14 +45,33 @@ const Myideas = () => {
         : "http://localhost:3000/get-Active-Idea";
 
       const response = await axios.get(url, {
-        params: role === "Founder" ? { userId } : {}, // Pass userId only if role is Founder
+        params: { userId },
       });
 
-      setIdeaList(response?.data);
+      setIdeaList(response?.data || []);
     } catch (error) {
       console.error("Error fetching ideas:", error);
-      setIdeaList([]); // Clear list on error
+      setIdeaList([]);
       toast.error("Failed to load ideas. Please try again.");
+    }
+  };
+
+  // Fetch Accepted Ideas for Talent
+  const fetchAcceptedIdeas = async (query = "") => {
+    try {
+      const url = query.trim()
+        ? `http://localhost:3000/get-pending-Idea?query=${query}`
+        : "http://localhost:3000/get-pending-Idea";
+
+      const response = await axios.get(url, {
+        params: { userId },
+      });
+
+      setAcceptedList(response?.data || []);
+    } catch (error) {
+      console.error("Error fetching accepted ideas:", error);
+      setAcceptedList([]);
+      toast.error("Failed to load accepted ideas. Please try again.");
     }
   };
 
@@ -70,35 +97,80 @@ const Myideas = () => {
           </div>
         </div>
 
-        {/* Ideas Section with Navigation */}
+        {/* Navigation Tabs */}
         <section className="mt-5">
           <div className="flex items-center mb-4 border-b border-gray-400 pb-2">
-            <NavLink 
-              to="/my-ideas"
-              className={({ isActive }) =>
-                `text-3xl font-semibold mx-4 pb-1 ${isActive ? "text-indigo-600 border-b-4 border-indigo-600" : "text-gray-500"}`
-              }
-            >
-              Active Ideas
-            </NavLink>
+            {role === "Founder" ? (
+              <>
+                <NavLink
+                  to="/my-ideas"
+                  className={({ isActive }) =>
+                    `text-3xl font-semibold mx-4 pb-1 ${
+                      isActive ? "text-indigo-600 border-b-4 border-indigo-600" : "text-gray-500"
+                    }`
+                  }
+                >
+                  Active Ideas
+                </NavLink>
 
-            <div className="h-8 w-[2px] bg-gray-400"></div> {/* Vertical Line */}
+                <div className="h-8 w-[2px] bg-gray-400"></div>
 
-            <NavLink 
-              to="/archive"
-              className={({ isActive }) =>
-                `text-3xl font-semibold mx-4 pb-1 ${isActive ? "text-indigo-600 border-b-4 border-indigo-600" : "text-gray-500"}`
-              }
-            >
-              Archive Ideas
-            </NavLink>
+                <NavLink
+                  to="/archive"
+                  className={({ isActive }) =>
+                    `text-3xl font-semibold mx-4 pb-1 ${
+                      isActive ? "text-indigo-600 border-b-4 border-indigo-600" : "text-gray-500"
+                    }`
+                  }
+                >
+                  Archive Ideas
+                </NavLink>
+              </>
+            ) : (
+              <>
+                <NavLink
+                  to="/my-ideas"
+                  className={({ isActive }) =>
+                    `text-3xl font-semibold mx-4 pb-1 ${
+                      isActive ? "text-indigo-600 border-b-4 border-indigo-600" : "text-gray-500"
+                    }`
+                  }
+                >
+                  Applied Ideas
+                </NavLink>
+
+                <div className="h-8 w-[2px] bg-gray-400"></div>
+
+                <NavLink
+                  to="/accepted-ideas"
+                  className={({ isActive }) =>
+                    `text-3xl font-semibold mx-4 pb-1 ${
+                      isActive ? "text-yellow-600 border-b-4 border-yellow-600" : "text-gray-500"
+                    }`
+                  }
+                >
+                  Accepted Ideas
+                </NavLink>
+                <div className="h-8 w-[2px] bg-gray-400"></div>
+                <NavLink
+                  to="/rejected-ideas"
+                  className={({ isActive }) =>
+                    `text-3xl font-semibold mx-4 pb-1 ${
+                      isActive ? "text-yellow-600 border-b-4 border-yellow-600" : "text-gray-500"
+                    }`
+                  }
+                >
+                  Rejected Ideas
+                </NavLink>
+              </>
+            )}
           </div>
 
           {/* Display Ideas */}
           <div className="grid grid-cols-3 gap-6">
-            {IdeaList.map((list) => (
-              <JobCard props={list} key={list.id} />
-            ))}
+            {role === "Founder"
+              ? IdeaList.map((list) => <JobCard props={list} key={list.id} />)
+              : acceptedList.map((list) => <IdeaCard props={list} key={list.id} />)}
           </div>
         </section>
       </div>

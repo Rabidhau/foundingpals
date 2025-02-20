@@ -27,6 +27,7 @@ const JobCard = ({ props }) => {
 
   const statusColor = props.status == 1 ? "bg-green-500" : "bg-red-500";
 
+const role=localStorage.getItem("userRole")
   const handleClick = () => {
     navigate(`/idea/${props.id}`);
   };
@@ -93,7 +94,7 @@ const JobCard = ({ props }) => {
       <div className="px-4 py-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-800">{props.ideaTitle}</h2>
-          {props.status != 1 && (
+          {props.status != 1 && role=="Founder" && (
             <PencilIcon
               className="w-5 h-5 text-yellow-500 cursor-pointer hover:text-yellow-600 transition"
               onClick={handleEditClick}

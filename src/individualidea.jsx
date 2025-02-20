@@ -4,14 +4,15 @@ import axios from "axios";
 import clsx from "clsx";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import JobCard from "./jobcard";
-import { useNavigate } from "react-router-dom";
 
 const IndividualIdea = () => {
   const [ideaInfo, setIdeaInfo] = useState({});
   const [ideaList, setIdeaList] = useState([]);
   const [appliedTalents, setAppliedTalents] = useState([]);
+  const [showReasonInput, setShowReasonInput] = useState({});
+  const [rejectionReasons, setRejectionReasons] = useState({});
   const navigate = useNavigate();
   const { id } = useParams();
   const userRole = localStorage.getItem("userRole");
@@ -49,15 +50,23 @@ const IndividualIdea = () => {
   };
 
   const handleAcceptReject = async (talentId, status) => {
+    const reason = status === 0 ? rejectionReasons[talentId] : null;
+
+    if (status === 0 && !reason) {
+      toast.error("Please provide a rejection reason.");
+      return;
+    }
+
     try {
       const response = await axios.post("http://localhost:3000/update-talent-status", {
         ideaId: id,
         talentId,
         status,
+        rejectionReason: reason,
       });
 
       if (response.status === 200) {
-        toast.success(`Talent ${status === "accepted" ? "Accepted" : "Rejected"} Successfully 🎉`);
+        toast.success(`Talent ${status === 1 ? "Accepted" : "Rejected"} Successfully 🎉`);
         fetchAppliedTalents(); // Refresh applied talents after update
       } else {
         toast.error("Error updating talent status 😢");
@@ -98,54 +107,30 @@ const IndividualIdea = () => {
     <main className="bg-gray-200 pt-20 px-20 pb-20">
       <h1 className="text-4xl font-bold">Idea Detail</h1>
       <div className="container mt-20 mx-auto px-4">
-        <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg overflow-hidden mb-4">
-          <div className="p-4">
-            <h2 className="text-xl font-semibold">{ideaInfo.ideaTitle}</h2>
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold">Idea Details</h3>
-              <p>{ideaInfo.ideaInfo}</p>
-            </div>
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold">Requirements</h3>
-              <p>{ideaInfo.requirements}</p>
-            </div>
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold">Idea Stage</h3>
-              <p>{ideaInfo.ideaStage}</p>
-            </div>
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold">Equity</h3>
-              <p>{ideaInfo.equity}</p>
-            </div>
+        <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg overflow-hidden mb-4 p-4">
+          <h2 className="text-xl font-semibold">{ideaInfo.ideaTitle}</h2>
+          <p className="mt-4"><strong>Details:</strong> {ideaInfo.ideaInfo}</p>
+          <p className="mt-4"><strong>Requirements:</strong> {ideaInfo.requirements}</p>
+          <p className="mt-4"><strong>Stage:</strong> {ideaInfo.ideaStage}</p>
+          <p className="mt-4"><strong>Equity:</strong> {ideaInfo.equity}</p>
 
-            {userRole === "Talent" && (
-              <button
-                className={clsx(
-                  "group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
-                  dayjs(ideaInfo.submitBy).isBefore(new Date())
-                    ? "bg-gray-600 pointer-events-none"
-                    : "bg-indigo-600"
-                )}
-                disabled={dayjs(ideaInfo.submitBy).isBefore(new Date())}
-                onClick={handleApply}
-              >
-                Apply Now
-              </button>
-            )}
-
-            {userRole === "Founder" && (
-              <p className="text-red-500 mt-4">
-                Only Talents can apply for ideas.
-              </p>
-            )}
-          </div>
+          {userRole === "Talent" && (
+            <button
+              className={clsx(
+                "group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
+                dayjs(ideaInfo.submitBy).isBefore(new Date()) ? "bg-gray-600 pointer-events-none" : "bg-indigo-600"
+              )}
+              disabled={dayjs(ideaInfo.submitBy).isBefore(new Date())}
+              onClick={handleApply}
+            >
+              Apply Now
+            </button>
+          )}
         </div>
-        {localStorage.getItem("userRole") === "Talent" && (
-          <>
-            <h1 className="text-4xl md:text-5xl lg:text-4xl font-bold text-black leading-tight mt-12 mb-8">
-              Recommended Ideas
-            </h1>
 
+        {userRole === "Talent" && (
+          <>
+            <h1 className="text-4xl font-bold mt-12 mb-8">Recommended Ideas</h1>
             <div className="grid grid-cols-3 gap-5">
               {ideaList.slice(0, 3).map((list) => (
                 <JobCard props={list} key={list.id} />
@@ -153,7 +138,7 @@ const IndividualIdea = () => {
             </div>
           </>
         )}
-        {/* Founder View: Show Applied Talents Table */}
+
         {userRole === "Founder" && (
           <div className="mt-8">
             <h2 className="text-2xl font-bold mb-4">Applied Talents</h2>
@@ -168,45 +153,47 @@ const IndividualIdea = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {appliedTalents.map((talent, index) => (
-                    <tr key={index} className="hover:bg-gray-50 transition">
-                      <td className="py-3 px-4 border-b">{talent.name}</td>
-                      <td className="py-3 px-4 border-b">{talent.email}</td>
-                      <td className="py-3 px-4 border-b">
-                        <span
-                          className={clsx(
-                            "px-3 py-1 rounded-full text-sm font-medium",
-                            talent.status === "accepted"
-                              ? "bg-green-200 text-green-800"
-                              : talent.status === "rejected"
-                              ? "bg-red-200 text-red-800"
-                              : "bg-yellow-200 text-yellow-800"
-                          )}
-                        >
-                          {talent.status || "Pending"}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 border-b">
-                        <button
-                          className="bg-green-500 text-white px-4 py-1 rounded mr-2 hover:bg-green-600"
-                          onClick={() => handleAcceptReject(talent.id, "accepted"||1)}
-                        >
-                          Accept
-                        </button>
-                        <button
-                          className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
-                          onClick={() => handleAcceptReject(talent.id, "rejected"||0)}
-                        >
-                          Reject
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {appliedTalents.map((talent) => {
+                    const statusText = talent.status === 1 ? "Accepted" :
+                      talent.status === 0 ? "Rejected" : "Pending";
+
+                    return (
+                      <tr key={talent.id} className="hover:bg-gray-50 transition">
+                        <td className="py-3 px-4 border-b">{talent.name}</td>
+                        <td className="py-3 px-4 border-b">{talent.email}</td>
+                        <td className="py-3 px-4 border-b">{statusText}</td>
+                        <td className="py-3 px-4 border-b">
+                          {talent.status === null ? (
+                            <>
+                              {showReasonInput[talent.id] ? (
+                                <div className="flex items-center">
+                                  <textarea
+                                    className="border rounded p-2 mr-2"
+                                    placeholder="Enter rejection reason"
+                                    value={rejectionReasons[talent.id] || ""}
+                                    onChange={(e) =>
+                                      setRejectionReasons({ ...rejectionReasons, [talent.id]: e.target.value })
+                                    }
+                                  />
+                                  <button className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600" onClick={() => handleAcceptReject(talent.id, 0)}>
+                                    Submit
+                                  </button>
+                                </div>
+                              ) : (
+                                <>
+                                  <button className="bg-green-500 text-white px-4 py-1 rounded mr-2 hover:bg-green-600" onClick={() => handleAcceptReject(talent.id, 1)}>Accept</button>
+                                  <button className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600" onClick={() => setShowReasonInput({ ...showReasonInput, [talent.id]: true })}>Reject</button>
+                                </>
+                              )}
+                            </>
+                          ) : <span className="text-gray-500">Decision Made</span>}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
-            ) : (
-              <p className="text-gray-500">No talents have applied yet.</p>
-            )}
+            ) : <p className="text-gray-500">No talents have applied yet.</p>}
           </div>
         )}
       </div>

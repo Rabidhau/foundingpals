@@ -15,6 +15,8 @@ import Collab from "./collab";
 import Explore from "./explore";
 import Myideas from "./myideas";
 import Archive from "./archiveidea";
+import AcceptedIdeas from "./acceptedideas";
+import Rejectedideas from "./rejectedIdeas";
 
 function App() {
   const router = createBrowserRouter([
@@ -30,6 +32,8 @@ function App() {
     { path: "/explore", element: <Explore /> },
     { path: "/my-ideas", element: <Myideas /> },
     { path: "/archive", element: <Archive /> },
+    { path: "/accepted-ideas", element: <AcceptedIdeas /> },
+    { path: "/rejected-ideas", element: <Rejectedideas /> },
   ]);
 
   return (
