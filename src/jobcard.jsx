@@ -3,12 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { PencilIcon } from "@heroicons/react/solid";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useLocation } from "react-router-dom";
 
 const JobCard = ({ props }) => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const location = useLocation(); // ✅ Get current route
+  const userRole = localStorage.getItem("userRole");
 
+  const isExplorePage = location.pathname.startsWith("/explore");
   // State for editing fields
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [selectedOptions1, setSelectedOptions1] = useState([]);
@@ -111,12 +115,14 @@ const role=localStorage.getItem("userRole")
         </div>
 
         <div className="flex justify-between items-center mt-4">
+        {!(isExplorePage && userRole === "Founder") && (
           <button
             className="px-4 py-2 bg-blue-500 text-white text-xs font-semibold rounded hover:bg-blue-600 transition duration-300"
             onClick={handleClick}
           >
             Read More
           </button>
+              )}
           <div className="flex items-center">
             <p className="mr-2">Status:</p>
             <div

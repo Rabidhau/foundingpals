@@ -170,7 +170,9 @@ const Myideas = () => {
           <div className="grid grid-cols-3 gap-6">
             {role === "Founder"
               ? IdeaList.map((list) => <JobCard props={list} key={list.id} />)
-              : acceptedList.map((list) => <IdeaCard props={list} key={list.id} />)}
+              : acceptedList
+              .filter((list) => list.status != 1&& list.status != 0)
+              .map((list) => <IdeaCard props={list} key={list.id} />)}
           </div>
         </section>
       </div>

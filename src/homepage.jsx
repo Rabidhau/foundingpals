@@ -1,30 +1,34 @@
 import React, { useEffect, useState } from "react";
 import { DotsVerticalIcon } from "@heroicons/react/outline";
-import JobCard from "./jobcard";
 import axios from "axios";
 import Sidebar from "./assets/sidebar";
 import Header from "./assets/header";
+import Idea_Card from "./ideacard_2";
 
 const Homepage = () => {
   const [IdeaList, setIdeaList] = useState([]);
   const [showAllIdeas, setShowAllIdeas] = useState(false);
+  
   const role = localStorage.getItem("userRole");
   const userId = localStorage.getItem("userId");
 
   useEffect(() => {
+    if (!userId) return; // Ensure userId exists before making a request
+
+    const endpoint = role === "Founder" ? "/get-accepted-Users" : "/get-accepted-Idea";
+
     axios
-      .get("http://localhost:3000/get-Active-Idea", {
-        params: role === "Founder" ? { userId } : {}, // Pass userId only if role is Founder
-      })
+      .get(`http://localhost:3000${endpoint}`, { params: { userId } })
       .then((response) => {
-        setIdeaList(response?.data);
+        setIdeaList(response?.data || []);
       })
       .catch((error) => {
-        console.log(error);
+        console.error("Error fetching data:", error);
       });
-  }, []);
+  }, [role, userId]); // Dependencies ensure it refetches if role/userId changes
 
-  const displayedIdeas = showAllIdeas ? IdeaList : IdeaList.slice(0, 2);
+  const filteredIdeas = IdeaList.filter((list) => list.acceptedStatus === 1);
+  const displayedIdeas = showAllIdeas ? filteredIdeas : filteredIdeas.slice(0, 2);
 
   return (
     <div className="flex h-screen w-screen bg-gray-50">
@@ -39,7 +43,7 @@ const Homepage = () => {
         <section className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-black">Your ideas</h2>
-            {IdeaList.length > 2 && (
+            {filteredIdeas.length > 2 && (
               <button
                 onClick={() => setShowAllIdeas(!showAllIdeas)}
                 className="text-indigo-600"
@@ -48,9 +52,9 @@ const Homepage = () => {
               </button>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-4">
             {displayedIdeas.map((list) => (
-              <JobCard props={list} key={list.id} />
+              <Idea_Card props={list} key={list.id} />
             ))}
           </div>
         </section>
@@ -85,9 +89,7 @@ const Homepage = () => {
 
 const ContractCard = () => (
   <div className="p-4 bg-white rounded shadow border relative items-center">
-    {/* Image/Thumbnail */}
     <img src="" alt="Contract Preview" className="w-12 h-12 rounded mr-4" />
-    {/* Text Content */}
     <div>
       <h4 className="font-medium text-gray-800 mb-1">Project AI designer contract</h4>
       <p className="text-sm text-gray-500 mb-2">Drafted</p>
@@ -95,7 +97,6 @@ const ContractCard = () => (
         <p>Collaboration Agreement</p>
       </div>
     </div>
-    {/* Dots Menu */}
     <button className="absolute bottom-4 right-4 text-gray-400 hover:text-gray-600">
       <DotsVerticalIcon className="h-2 w-2" />
     </button>

@@ -111,7 +111,7 @@ const AcceptedIdeas = () => {
           {/* Display Accepted Ideas */}
           <div className="grid grid-cols-3 gap-6">
           {acceptedList
-    .filter((list) => list.acceptedStatus === 1) 
+    .filter((list) => list.acceptedStatus == 1) 
     .map((list) => (
       <IdeaCard props={list} key={list.id} /> 
     ))}

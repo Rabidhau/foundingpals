@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import JobCard from "./jobcard";
+import { useLocation } from "react-router-dom";
 
 const IndividualIdea = () => {
   const [ideaInfo, setIdeaInfo] = useState({});
@@ -14,8 +15,11 @@ const IndividualIdea = () => {
   const [showReasonInput, setShowReasonInput] = useState({});
   const [rejectionReasons, setRejectionReasons] = useState({});
   const navigate = useNavigate();
+  const location = useLocation(); // ✅ Get current route
   const { id } = useParams();
   const userRole = localStorage.getItem("userRole");
+
+  const isExplorePage = location.pathname.startsWith("/explore");
 
   const handleApply = async (e) => {
     e.preventDefault();
@@ -129,15 +133,15 @@ const IndividualIdea = () => {
         </div>
 
         {userRole === "Talent" && (
-          <>
-            <h1 className="text-4xl font-bold mt-12 mb-8">Recommended Ideas</h1>
-            <div className="grid grid-cols-3 gap-5">
-              {ideaList.slice(0, 3).map((list) => (
-                <JobCard props={list} key={list.id} />
-              ))}
-            </div>
-          </>
-        )}
+  <>
+    <h1 className="text-4xl font-bold mt-12 mb-8">Recommended Ideas</h1>
+    <div className="grid grid-cols-3 gap-5">
+      {ideaList.slice(0, 3).map((list) => (
+        <JobCard props={list} key={list.id} isExplorePage={isExplorePage} userRole={userRole} />
+      ))}
+    </div>
+  </>
+)}
 
         {userRole === "Founder" && (
           <div className="mt-8">
