@@ -27,6 +27,8 @@ const Login = () => {
         localStorage.setItem("userEmail", userData.email);
         localStorage.setItem("userName", userData.username);
         localStorage.setItem("userRole", userData.role);
+        localStorage.setItem("profileImage", userData.profile_image);
+
 
         toast.success("Login successful! 🎉", { autoClose: 2000 });
         setTimeout(() => navigate("/authentication"), 1500);

@@ -18,6 +18,9 @@ import Archive from "./archiveidea";
 import AcceptedIdeas from "./acceptedideas";
 import Rejectedideas from "./rejectedIdeas";
 
+import Messages from "./messages";
+import ContractPage from "./contractpage";
+
 function App() {
   const router = createBrowserRouter([
     { path: "/home", element: <Homepage /> },
@@ -34,6 +37,9 @@ function App() {
     { path: "/archive", element: <Archive /> },
     { path: "/accepted-ideas", element: <AcceptedIdeas /> },
     { path: "/rejected-ideas", element: <Rejectedideas /> },
+    { path: "/message", element: <Messages /> },
+    { path: "/contracts", element: <ContractPage /> },
+
   ]);
 
   return (
