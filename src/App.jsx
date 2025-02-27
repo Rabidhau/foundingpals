@@ -17,9 +17,10 @@ import Myideas from "./myideas";
 import Archive from "./archiveidea";
 import AcceptedIdeas from "./acceptedideas";
 import Rejectedideas from "./rejectedIdeas";
-
-import Messages from "./messages";
 import ContractPage from "./contractpage";
+import Agreement from "./contract";
+import Messages from "./messages"
+import PalPage from "./palpage";
 
 function App() {
   const router = createBrowserRouter([
@@ -33,12 +34,15 @@ function App() {
     { path: "/idea/:id", element: <IndividualIdea /> },
     { path: "/collab-idea", element: <Collab /> },
     { path: "/explore", element: <Explore /> },
-    { path: "/my-ideas", element: <Myideas /> },
-    { path: "/archive", element: <Archive /> },
+    { path: "/my-ideas/active", element: <Myideas /> },
+    { path: "/my-ideas/archive", element: <Archive /> },
     { path: "/accepted-ideas", element: <AcceptedIdeas /> },
     { path: "/rejected-ideas", element: <Rejectedideas /> },
-    { path: "/message", element: <Messages /> },
+    { path: "/messages", element: <Messages /> },
     { path: "/contracts", element: <ContractPage /> },
+    { path: "/contracts/agreement", element: <Agreement /> },
+    { path: "/pals", element: <PalPage /> },
+
 
   ]);
 

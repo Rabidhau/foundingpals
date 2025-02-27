@@ -133,7 +133,7 @@ const Header = () => {
                 Upload Image
               </label>
               <button className="w-full text-left text-sm text-gray-700 p-2 hover:bg-gray-100 rounded">
-                Update Image
+                Update Profile
               </button>
             </div>
           )}

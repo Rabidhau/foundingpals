@@ -73,7 +73,7 @@ const Archive = () => {
         <section className="mt-5">
           <div className="flex items-center mb-4 border-b border-gray-400 pb-2">
             <NavLink 
-              to="/my-ideas"
+              to="/my-ideas/active"
               className={({ isActive }) =>
                 `text-3xl font-semibold mx-4 pb-1 ${isActive ? "text-indigo-600 border-b-4 border-indigo-600" : "text-gray-500"}`
               }
@@ -84,7 +84,7 @@ const Archive = () => {
             <div className="h-8 w-[2px] bg-gray-400"></div> {/* Vertical Line */}
 
             <NavLink 
-              to="/archive"
+              to="/my-ideas/archive"
               className={({ isActive }) =>
                 `text-3xl font-semibold mx-4 pb-1 ${isActive ? "text-indigo-600 border-b-4 border-indigo-600" : "text-gray-500"}`
               }

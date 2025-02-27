@@ -103,7 +103,7 @@ const Myideas = () => {
             {role === "Founder" ? (
               <>
                 <NavLink
-                  to="/my-ideas"
+                  to="/my-ideas/active"
                   className={({ isActive }) =>
                     `text-3xl font-semibold mx-4 pb-1 ${
                       isActive ? "text-indigo-600 border-b-4 border-indigo-600" : "text-gray-500"
@@ -116,7 +116,7 @@ const Myideas = () => {
                 <div className="h-8 w-[2px] bg-gray-400"></div>
 
                 <NavLink
-                  to="/archive"
+                  to="/my-ideas/archive"
                   className={({ isActive }) =>
                     `text-3xl font-semibold mx-4 pb-1 ${
                       isActive ? "text-indigo-600 border-b-4 border-indigo-600" : "text-gray-500"
@@ -129,7 +129,7 @@ const Myideas = () => {
             ) : (
               <>
                 <NavLink
-                  to="/my-ideas"
+                  to="/my-ideas/active"
                   className={({ isActive }) =>
                     `text-3xl font-semibold mx-4 pb-1 ${
                       isActive ? "text-indigo-600 border-b-4 border-indigo-600" : "text-gray-500"

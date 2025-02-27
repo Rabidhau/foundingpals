@@ -6,7 +6,7 @@ import {
   ChatIcon,
   DocumentIcon,
   UserGroupIcon,
-  SupportIcon,
+
 } from "@heroicons/react/outline";
 import { PowerOffIcon } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -18,7 +18,7 @@ const Sidebar = () => {
   const sidebarItems = [
     { name: "Dashboard", icon: <HomeIcon className="h-5 w-5 mr-2" />, path: "/home" },
     { name: "Explore", icon: <GlobeAltIcon className="h-5 w-5 mr-2" />, path: "/explore" },
-    { name: "My ideas", icon: <LightBulbIcon className="h-5 w-5 mr-2" />, path: "/my-ideas" },
+    { name: "My ideas", icon: <LightBulbIcon className="h-5 w-5 mr-2" />, path: "/my-ideas/active" },
     { name: "Messages", icon: <ChatIcon className="h-5 w-5 mr-2" />, path: "/messages" },
     { name: "Contracts", icon: <DocumentIcon className="h-5 w-5 mr-2" />, path: "/contracts" },
     { name: "Pals", icon: <UserGroupIcon className="h-5 w-5 mr-2" />, path: "/pals" },
@@ -40,7 +40,7 @@ const Sidebar = () => {
             onClick={() => navigate(item.path)}
             className={`mb-5 text-xl flex items-center cursor-pointer transition duration-300 px-3 py-2 rounded-md 
               ${
-                location.pathname === item.path
+                location.pathname.startsWith(item.path) // Check if path starts with the sidebar item's path
                   ? "text-indigo-600 bg-gray-200 font-semibold"
                   : "text-gray-700 hover:text-indigo-600 hover:bg-gray-200"
               }`}

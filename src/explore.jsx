@@ -45,11 +45,20 @@ const Explore = () => {
     <div className="flex h-screen w-screen bg-gray-50">
       <Sidebar />
       <div className="flex-1 p-6 overflow-y-auto">
+        <div className="flex justify-between">
+        <h2 className="text-3xl font-semibold text-black">Explore Ideas</h2>
         <Subheader />
+        </div>
+       
         {error && <p className="text-red-500">{error}</p>}
         
         {/* Search Bar */}
-        <div className="max-w-md bg-white rounded-lg overflow-hidden shadow-lg">
+
+
+        {/* Ideas Section */}
+        <section className="mt-auto">
+          <div className="flex justify-between items-center mb-4">
+          <div className="max-w-md bg-white rounded-lg overflow-hidden shadow-lg">
           <div className="flex items-center border-b border-gray-200 px-4">
             <input
               type="text"
@@ -63,11 +72,6 @@ const Explore = () => {
             </button>
           </div>
         </div>
-
-        {/* Ideas Section */}
-        <section className="mt-5">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-3xl font-semibold text-black">Explore Ideas</h2>
             <a href="#" className="text-indigo-600">View all</a>
           </div>
           <div className="grid grid-cols-3 gap-6">
