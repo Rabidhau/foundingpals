@@ -157,15 +157,29 @@ const IndividualIdea = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {appliedTalents.map((talent) => {
-                    const statusText = talent.status === 1 ? "Accepted" :
-                      talent.status === 0 ? "Rejected" : "Pending";
+                {appliedTalents.map((talent) => {
+  let statusText, statusClass;
 
-                    return (
-                      <tr key={talent.id} className="hover:bg-gray-50 transition">
-                        <td className="py-3 px-4 border-b">{talent.name}</td>
-                        <td className="py-3 px-4 border-b">{talent.email}</td>
-                        <td className="py-3 px-4 border-b">{statusText}</td>
+  if (talent.status === 1) {
+    statusText = "Accepted";
+    statusClass = "text-green-700 border-green-300 bg-green-100";
+  } else if (talent.status === 0) {
+    statusText = "Rejected";
+    statusClass = "text-red-700 border-red-300 bg-red-100";
+  } else {
+    statusText = "Pending";
+    statusClass = "text-yellow-700 border-yellow-300 bg-yellow-100";
+  }
+
+  return (
+    <tr key={talent.id} className="hover:bg-gray-50 transition">
+      <td className="py-3 px-4 border-b">{talent.name}</td>
+      <td className="py-3 px-4 border-b">{talent.email}</td>
+      <td className="py-3 px-4 border-b ">
+        <span className={`px-3 py-1 border rounded-full ${statusClass}`}>
+          {statusText}
+        </span>
+      </td>
                         <td className="py-3 px-4 border-b">
                           {talent.status === null ? (
                             <>

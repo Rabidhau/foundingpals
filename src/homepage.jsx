@@ -4,6 +4,7 @@ import axios from "axios";
 import Sidebar from "./assets/sidebar";
 import Header from "./assets/header";
 import Idea_Card from "./ideacard_2";
+import Pal_card from "./palcard_1";
 
 const Homepage = () => {
   const [IdeaList, setIdeaList] = useState([]);
@@ -78,8 +79,7 @@ const Homepage = () => {
             <a href="#" className="text-indigo-600">View all</a>
           </div>
           <div className="grid grid-cols-2 gap-6">
-            <PalCard name="Marco Kelly" role="Social Media Manager" />
-            <PalCard name="Olly Schroeder" role="DevOps Engineer" />
+< Pal_card />
           </div>
         </section>
       </div>
@@ -103,17 +103,5 @@ const ContractCard = () => (
   </div>
 );
 
-const PalCard = ({ name, role }) => (
-  <div className="flex items-center p-4 bg-white rounded shadow border">
-    <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
-    <div className="flex-1">
-      <h4 className="font-semibold text-gray-800">{name}</h4>
-      <p className="text-sm text-gray-500">{role}</p>
-    </div>
-    <button className="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm">
-      Message
-    </button>
-  </div>
-);
 
 export default Homepage;

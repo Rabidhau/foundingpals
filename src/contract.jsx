@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect,useState } from "react";
 import Sidebar from "./assets/sidebar";
 import Subheader from "./assets/subheader";
+import axios from "axios";
+
 
 const Agreement = () => {
   // State for all input fields
@@ -23,6 +25,124 @@ const Agreement = () => {
   const [collaboratorSignature, setCollaboratorSignature] = useState("");
   const [collaboratorDate, setCollaboratorDate] = useState("");
 
+  // State for signature modal
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
+  const [currentSigner, setCurrentSigner] = useState("");
+
+  // State for friend list popup
+  const [friends, setFriends] = useState([]);
+  const [showFriendListPopup, setShowFriendListPopup] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState(null);
+
+
+// Function to fetch friends
+const getFriends = async () => {
+  try {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      console.error("No user ID found in localStorage.");
+      return;
+    }
+
+    const response = await axios.get("http://localhost:3000/get-friend", {
+      params: { userId },
+    });
+
+    console.log("API Response:", response.data);
+
+    if (Array.isArray(response.data)) { // Check if response.data is an array
+      setFriends(response.data); // Set the array directly
+      setShowFriendListPopup(true);
+    } else {
+      console.error("Expected an array but got:", typeof response.data);
+      setFriends([]); // Fallback
+    }
+  } catch (error) {
+    console.error("Error getting friends:", error);
+    setFriends([]); // Fallback
+  }
+};
+
+// Handle sending the agreement
+const handleSend = () => {
+  getFriends(); // Fetch friends list when clicking "Send Agreement"
+};
+
+  // Handle opening the signature modal
+  const handleOpenModal = (signer) => {
+    setCurrentSigner(signer);
+    setShowSignatureModal(true);
+  };
+
+  // Handle signature upload
+  const handleSignatureUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      if (currentSigner === "Founder") {
+        setFounderSignature(imageUrl);
+      } else {
+        setCollaboratorSignature(imageUrl);
+      }
+      setShowSignatureModal(false);
+    }
+  };
+
+  // Handle form submission
+  const handleSubmit = async () => {
+    const agreementData = {
+      effectiveDate,
+      founderName,
+      founderAddress,
+      founderEmail,
+      collaboratorName,
+      collaboratorAddress,
+      collaboratorEmail,
+      projectTitle,
+      projectDescription,
+      founderResponsibilities,
+      collaboratorResponsibilities,
+      equityPercentage,
+      vestingSchedule,
+      terminationNotice,
+      founderSignature,
+      founderDate,
+      collaboratorSignature,
+      collaboratorDate,
+    };
+
+    try {
+      const response = await fetch("http://localhost:3000/agreements", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(agreementData),
+      });
+
+      if (response.ok) {
+        alert("Agreement saved and sent successfully");
+      } else {
+        alert("Failed to send agreement");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+
+  const handleSendToFriend = (friend) => {
+    setSelectedFriend(friend);
+    setShowPopup(true);
+  };
+
+  const handlePaymentDecision = (decision) => {
+    if (decision === "yes") {
+
+    }
+    setShowPopup(false);
+  };
   return (
     <div className="flex h-screen w-screen bg-gray-50">
       {/* Sidebar */}
@@ -216,77 +336,177 @@ const Agreement = () => {
 
             {/* Signatures */}
             <div className="mt-8 border-t pt-6 flex justify-between">
-      {/* Founder Section */}
-      <div className="text-gray-700">
-        <p className="font-semibold">Founder:</p>
-        <p>
-          Signature:{" "}
-          <input
-            type="text"
-            value={founderSignature}
-            onChange={(e) => setFounderSignature(e.target.value)}
-            placeholder="Founder’s Signature"
-            className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-          />
-        </p>
-        <p>
-          Name:{" "}
-          <input
-            type="text"
-            value={founderName}
-            onChange={(e) => setFounderName(e.target.value)}
-            placeholder="Founder’s Full Name"
-            className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-          />
-        </p>
-        <p>
-          Date:{" "}
-          <input
-            type="date"
-            value={founderDate}
-            onChange={(e) => setFounderDate(e.target.value)}
-            className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-          />
-        </p>
-      </div>
+              {/* Founder Section */}
+              <div className="text-gray-700">
+                <p className="font-semibold">Founder:</p>
+                {founderSignature ? (
+                  <img src={founderSignature} alt="Founder Signature" className="h-12" />
+                ) : (
+                  <button
+                    onClick={() => handleOpenModal("Founder")}
+                    className="text-purple-600 font-semibold text-xl"
+                  >
+                    + Add Signature
+                  </button>
+                )}
+                <p>
+                  Name:{" "}
+                  <input
+                    type="text"
+                    value={founderName}
+                    onChange={(e) => setFounderName(e.target.value)}
+                    placeholder="Founder’s Full Name"
+                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
+                  />
+                </p>
+                <p>
+                  Date:{" "}
+                  <input
+                    type="date"
+                    value={founderDate}
+                    onChange={(e) => setFounderDate(e.target.value)}
+                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
+                  />
+                </p>
+              </div>
 
-      {/* Collaborator Section */}
-      <div className="text-gray-700">
-        <p className="font-semibold">Collaborator:</p>
-        <p>
-          Signature:{" "}
-          <input
-            type="text"
-            value={collaboratorSignature}
-            onChange={(e) => setCollaboratorSignature(e.target.value)}
-            placeholder="Collaborator’s Signature"
-            className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-          />
-        </p>
-        <p>
-          Name:{" "}
-          <input
-            type="text"
-            value={collaboratorName}
-            onChange={(e) => setCollaboratorName(e.target.value)}
-            placeholder="Collaborator’s Full Name"
-            className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-          />
-        </p>
-        <p>
-          Date:{" "}
-          <input
-            type="date"
-            value={collaboratorDate}
-            onChange={(e) => setCollaboratorDate(e.target.value)}
-            className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-          />
-        </p>
-      </div>
-    </div>
+              {/* Collaborator Section */}
+              <div className="text-gray-700">
+                <p className="font-semibold">Collaborator:</p>
+                {collaboratorSignature ? (
+                  <img src={collaboratorSignature} alt="Collaborator Signature" className="h-12" />
+                ) : (
+                  <button
+                    onClick={() => handleOpenModal("Collaborator")}
+                    className="text-purple-600 font-semibold text-xl"
+                  >
+                    + Add Signature
+                  </button>
+                )}
+                <p>
+                  Name:{" "}
+                  <input
+                    type="text"
+                    value={collaboratorName}
+                    onChange={(e) => setCollaboratorName(e.target.value)}
+                    placeholder="Collaborator’s Full Name"
+                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
+                  />
+                </p>
+                <p>
+                  Date:{" "}
+                  <input
+                    type="date"
+                    value={collaboratorDate}
+                    onChange={(e) => setCollaboratorDate(e.target.value)}
+                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
+                  />
+                </p>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="mt-8">
+              <button
+                onClick={handleSend}
+                className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700"
+              >
+                Send Agreement
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Signature Modal */}
+      {showSignatureModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h2 className="text-lg font-semibold mb-4 text-center">Sign contract</h2>
+            <div className="border-dashed border-2 border-gray-300 p-6 text-center">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleSignatureUpload}
+                className="hidden"
+                id="signature-upload"
+              />
+              <label htmlFor="signature-upload" className="cursor-pointer text-purple-600">
+                Click to upload
+              </label>
+            </div>
+            <button
+              onClick={() => setShowSignatureModal(false)}
+              className="mt-4 w-full bg-purple-600 text-white py-2 rounded-lg"
+            >
+              Confirm Signature
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Friend List Popup */}
+      {showFriendListPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h2 className="text-lg font-semibold mb-4 text-center">Send Agreement To</h2>
+            <div className="space-y-2">
+            {Array.isArray(friends) && friends.length > 0 ? (
+  friends.map((friend) => (
+    <div key={friend.userId} className="flex  justify-between items-center p-2 border border-gray-200 rounded-lg">
+      <div className="flex"><img 
+  src={`http://localhost:3000${friend.profile_image}`} 
+  alt="Friend Profile" 
+  className="w-10 h-10 rounded-full object-cover"
+/>
+      <span className="mt-1 mx-4">@{friend.username}</span></div>
+      <button
+        onClick={() => handleSendToFriend(friend.email)}
+        className="bg-purple-600 text-white px-4 py-1 rounded-lg"
+      >
+        Send
+      </button>
+    </div>
+  ))
+) : (
+  <p className="text-gray-600 text-center">No friends found.</p>
+)}
+            </div>
+            <button
+              onClick={() => setShowFriendListPopup(false)}
+              className="mt-4 w-full bg-gray-300 text-black py-2 rounded-lg"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+            {showPopup && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h3 className="text-lg font-semibold mb-4 text-center">
+              To share a contract, you need to make a payment first.
+            </h3>
+            <p className="text-center text-gray-600 mb-4">
+              Would you like to continue with the payment?
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={() => handlePaymentDecision("yes")}
+                className="bg-green-500 text-white px-4 py-2 rounded-lg"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => handlePaymentDecision("no")}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg"
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

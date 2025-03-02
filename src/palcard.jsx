@@ -74,7 +74,7 @@ const PalCard = ({ props }) => {
           onClick={handleAddFriend}
           disabled={isRequestSent}
         >
-          {isRequestSent ? "Request Sent" : "Add Friend"}
+          {isRequestSent ? "Following" : "Follow"}
         </button>
       </div>
 
