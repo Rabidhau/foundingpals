@@ -21,6 +21,8 @@ import ContractPage from "./contractpage";
 import Agreement from "./contract";
 import Messages from "./messages"
 import PalPage from "./palpage";
+import Success from "./success";
+import Preview from "./preview";
 
 function App() {
   const router = createBrowserRouter([
@@ -42,6 +44,8 @@ function App() {
     { path: "/contracts", element: <ContractPage /> },
     { path: "/contracts/agreement", element: <Agreement /> },
     { path: "/pals", element: <PalPage /> },
+    { path: "/success", element: <Success /> },
+    { path: "/preview/:id", element: <Preview /> }
 
 
   ]);

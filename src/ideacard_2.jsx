@@ -1,14 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 const Idea_Card = ({ props }) => {
-  const [comment, setComment] = useState(props.comment || "No comment available");
-  const [completionPercent, setCompletionPercent] = useState(props.completionPercent || 0);
+  const [comment, setComment] = useState("Loading...");
+  const [completionPercent, setCompletionPercent] = useState(0);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  
+
   const userRole = localStorage.getItem("userRole"); // Get user role from localStorage
+
+
+
 
   const handleSave = async () => {
     setLoading(true);
@@ -45,24 +48,26 @@ const Idea_Card = ({ props }) => {
           <p className="text-sm text-green-600 bg-green-200 p-2 rounded">{props.ideaType}</p>
         </div>
 
-        {/* Show comment and completion details only if acceptedStatus === 1 */}
         {props.acceptedStatus === 1 && (
           <div className="mt-4 border-t pt-4">
             {!editMode ? (
               <>
                 {/* Display Mode */}
-                <p className="text-sm text-gray-700"><strong>Comment:</strong> {comment}</p>
-                <p className="text-sm text-gray-700"><strong>Completion:</strong> {completionPercent}%</p>
+                <p className="text-sm text-gray-700"><strong>Comment:</strong> {props.comment}</p>
+                <p className="text-sm text-gray-700"><strong>Completion:</strong> {props.completion}%</p>
 
-                {/* Show Edit button only if userRole is "Talent" */}
                 {userRole === "Talent" && (
-                  <button
-                    className="mt-3 w-full bg-yellow-500 text-white font-semibold py-2 rounded-md hover:bg-yellow-600 transition"
-                    onClick={() => setEditMode(true)}
-                  >
-                    Edit
-                  </button>
-                )}
+  <button
+    className="mt-3 w-full bg-yellow-500 text-white font-semibold py-2 rounded-md hover:bg-yellow-600 transition"
+    onClick={() => {
+      setComment(props.comment || "No comment available");  // Copy props value into state
+      setCompletionPercent(props.completion || 0);
+      setEditMode(true);
+    }}
+  >
+    Edit
+  </button>
+)}
               </>
             ) : (
               <>

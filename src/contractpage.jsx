@@ -1,21 +1,95 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Subheader from "./assets/subheader";
 import Sidebar from "./assets/sidebar";
 
 const ContractPage = () => {
   const navigate = useNavigate();
-  const [userRole, setUserRole] = useState(null);
+  const [userRole, setUserRole] = useState("");
+  const [userName, setUserName] = useState("");
+  const [agreements, setAgreements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedAgreement, setSelectedAgreement] = useState(null);
+  const [signature, setSignature] = useState(null);
 
   useEffect(() => {
-    // Fetch userRole from localStorage
-    const storedUserRole = localStorage.getItem("userRole");
+    const storedUserRole = localStorage.getItem("userRole") || "";
+    const storedUserName = localStorage.getItem("userName") || "";
+
     setUserRole(storedUserRole);
+    setUserName(storedUserName);
+
+    if (storedUserRole === "Talent" && storedUserName) {
+      fetchAgreements(storedUserName, storedUserRole);
+    } else {
+      setLoading(false);
+    }
   }, []);
 
-  // Redirect to create contract page
+  const fetchAgreements = async (userName, role) => {
+    try {
+      const response = await axios.get("http://localhost:3000/get-agreement", {
+        params: { userName, userRole: role },
+      });
+
+      if (response.data.success) {
+        setAgreements(response.data.agreements);
+      } else {
+        setError("Failed to fetch agreements.");
+      }
+    } catch (err) {
+      setError("Error fetching agreements.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCreateContract = () => {
     navigate("/contracts/agreement");
+  };
+
+  const handleSignContract = (agreement) => {
+    setSelectedAgreement(agreement);
+    setShowModal(true);
+  };
+
+  const handleFileChange = (event) => {
+    setSignature(event.target.files[0]);
+  };
+
+  const handleUploadSignature = async () => {
+    if (!signature || !selectedAgreement) {
+      alert("Please select a signature file.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("signatureImage", signature);
+    formData.append("userName", userName);
+    formData.append("userRole", userRole);
+    formData.append("agreementId", selectedAgreement.id);
+
+    try {
+      const response = await axios.post("http://localhost:3000/upload-signature", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response.data.success) {
+        alert("Signature uploaded successfully!");
+        setShowModal(false);
+        setSignature(null);
+        fetchAgreements(userName, userRole); // Refresh agreements after signing
+      } else {
+        alert("Failed to upload signature.");
+      }
+    } catch (error) {
+      console.error("Error uploading signature:", error);
+      alert("Error uploading signature.");
+    }
   };
 
   return (
@@ -27,82 +101,84 @@ const ContractPage = () => {
           <Subheader />
         </div>
 
-        {userRole === "Founder" ? (
-          // Founder View (Create Contract UI)
-          <div className="mt-40 text-center justify-center">
-            <h2 className="text-3xl font-bold text-black mb-4">
-              Contracts & Simple E-Signing
-            </h2>
+        {loading ? (
+          <p className="text-gray-500 text-center">Loading...</p>
+        ) : error ? (
+          <p className="text-red-500 text-center">{error}</p>
+        ) : userRole === "Founder" ? (
+          <div className="mt-40 text-center">
+            <h2 className="text-3xl font-bold text-black mb-4">Contracts & Simple E-Signing</h2>
             <p className="text-gray-600 mb-6">
-              Use standardized contracts or create a completely custom one.
-              Enter your payment terms and scope, and send it to be e-signed.
+              Use standardized contracts or create a completely custom one. Enter your payment terms and scope, and send it to be e-signed.
             </p>
-            <button
-              className="bg-purple-600 text-white px-4 py-2 rounded-lg"
-              onClick={handleCreateContract}
-            >
+            <button className="bg-purple-600 text-white px-4 py-2 rounded-lg" onClick={handleCreateContract}>
               Create contract
             </button>
           </div>
         ) : userRole === "Talent" ? (
-          // Talent View (Filtered Contracts UI)
           <div>
-            {/* Filters Section */}
-            <div className="flex justify-between items-center mb-6">
-              <input
-                type="text"
-                placeholder="Search.."
-                className="px-4 py-2 border rounded-lg w-1/3"
-              />
-              <button className="flex items-center px-4 py-2 border rounded-lg">
-                <span className="mr-2">Filters</span> ⏷
-              </button>
-            </div>
-
-            {/* Active Filters */}
-            <div className="flex space-x-2 mb-4">
-              <span className="px-3 py-1 text-purple-600 border border-purple-300 rounded-full">
-                STATUS <strong>Draft</strong> ✕
-              </span>
-              <span className="px-3 py-1 text-purple-600 border border-purple-300 rounded-full">
-                PAL <strong>@marco</strong> ✕
-              </span>
-              <span className="px-3 py-1 text-purple-600 border border-purple-300 rounded-full">
-                IDEA <strong>Project AI</strong> ✕
-              </span>
-            </div>
-
-            {/* Contracts Table */}
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="text-left text-gray-500">
-                  <th className="py-2 px-4">Contract title</th>
-                  <th className="py-2 px-4">Pals</th>
-                  <th className="py-2 px-4">Project</th>
-                  <th className="py-2 px-4">Status</th>
-                  <th className="py-2 px-4">...</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-t">
-                  <td className="py-3 px-4">Project AI designer contract</td>
-                  <td className="py-3 px-4">Marco Kelly</td>
-                  <td className="py-3 px-4">Project AI</td>
-                  <td className="py-3 px-4">
-                    <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full">
-                      Pending
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">...</td>
-                </tr>
-              </tbody>
-            </table>
+            <h2 className="text-2xl font-semibold text-black mb-4">Your Contracts</h2>
+            {agreements.length === 0 ? (
+              <p className="text-gray-500">No contracts found.</p>
+            ) : (
+              <table className="w-full border-collapse bg-white shadow-lg rounded-lg">
+                <thead>
+                  <tr className="text-left text-gray-500 bg-gray-200">
+                    <th className="py-2 px-4">Contract Title</th>
+                    <th className="py-2 px-4">Collaborator</th>
+                    <th className="py-2 px-4">Equity %</th>
+                    <th className="py-2 px-4">Status</th>
+                    <th className="py-2 px-4">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {agreements.map((agreement) => {
+                    const isPending = !agreement.collaboratorSignature; // ✅ Fixed extra semicolon
+                    return (
+                      <tr key={agreement.id} className="border-t hover:bg-gray-100">
+                        <td className="py-3 px-4">{agreement.projectTitle}</td>
+                        <td className="py-3 px-4">{agreement.collaboratorName}</td>
+                        <td className="py-3 px-4">{agreement.equityPercentage}%</td>
+                        <td className="py-3 px-4">
+                          <span className={`px-3 py-1 rounded-full ${isPending ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"}`}>
+                            {isPending ? "Pending" : "Complete"}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          {isPending && (
+                            <button className="text-blue-600 hover:underline" onClick={() => handleSignContract(agreement)}>
+                              Sign contract
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
           </div>
         ) : (
-          // Loading or Unauthorized
-          <p className="text-gray-500 text-center">Loading...</p>
+          <p className="text-gray-500 text-center">Unauthorized Access</p>
         )}
       </div>
+
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-semibold mb-4">Upload Your Signature</h2>
+            <input type="file" accept="image/*" onChange={handleFileChange} className="mb-4 w-full border border-gray-300 p-2 rounded" />
+            <div className="flex justify-end">
+              <button className="bg-gray-400 text-white px-4 py-2 rounded-lg mr-2" onClick={() => setShowModal(false)}>
+                Cancel
+              </button>
+              <button className="bg-purple-600 text-white px-4 py-2 rounded-lg" onClick={handleUploadSignature}>
+                Upload
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

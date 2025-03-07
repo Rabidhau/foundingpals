@@ -2,6 +2,7 @@ import React, { useEffect,useState } from "react";
 import Sidebar from "./assets/sidebar";
 import Subheader from "./assets/subheader";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 
 const Agreement = () => {
@@ -34,7 +35,13 @@ const Agreement = () => {
   const [showFriendListPopup, setShowFriendListPopup] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState(null);
-
+  const [formData] = useState({
+    total: "1000",
+    email: localStorage.getItem("userEmail"),
+    name: localStorage.getItem("userName"),
+    address: founderAddress,
+    title: projectTitle
+  });
 
 // Function to fetch friends
 const getFriends = async () => {
@@ -89,7 +96,6 @@ const handleSend = () => {
     }
   };
 
-  // Handle form submission
   const handleSubmit = async () => {
     const agreementData = {
       effectiveDate,
@@ -111,24 +117,12 @@ const handleSend = () => {
       collaboratorSignature,
       collaboratorDate,
     };
-
-    try {
-      const response = await fetch("http://localhost:3000/agreements", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(agreementData),
-      });
-
-      if (response.ok) {
-        alert("Agreement saved and sent successfully");
-      } else {
-        alert("Failed to send agreement");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-    }
+  
+    // Store agreement data in localStorage
+    localStorage.setItem("agreementData", JSON.stringify(agreementData));
+  
+    // Redirect to payment gateway
+    handlePaymentDecision("yes");
   };
 
 
@@ -136,10 +130,32 @@ const handleSend = () => {
     setSelectedFriend(friend);
     setShowPopup(true);
   };
-
-  const handlePaymentDecision = (decision) => {
+  const handlePaymentDecision = async (decision) => { 
     if (decision === "yes") {
-
+      try {
+        const response = await axios.post("http://localhost:3000/payment", formData);
+        const esewaData = response.data;
+  
+        // Redirect user to Esewa payment page with form data
+        const paymentUrl = `https://rc-epay.esewa.com.np/api/epay/main/v2/form`;
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = paymentUrl;
+  
+        Object.keys(esewaData).forEach((key) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = key;
+          input.value = esewaData[key];
+          form.appendChild(input);
+        });
+  
+        document.body.appendChild(form);
+        form.submit();
+      } catch (error) {
+        console.error("Payment Error:", error);
+        toast.error("Failed to initiate payment.");
+      }
     }
     setShowPopup(false);
   };
@@ -492,7 +508,7 @@ const handleSend = () => {
             </p>
             <div className="flex justify-center space-x-4">
               <button
-                onClick={() => handlePaymentDecision("yes")}
+                onClick={() => handleSubmit()}
                 className="bg-green-500 text-white px-4 py-2 rounded-lg"
               >
                 Yes
