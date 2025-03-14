@@ -1,12 +1,32 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const ContractCard = ({ contract }) => {
+const ContractCard = ({ contract, onDelete }) => {
   const navigate = useNavigate();
-  const userRole=localStorage.getItem("userRole")
+  const userRole = localStorage.getItem("userRole");
 
   const handlePreview = () => {
-    navigate(`/preview/${contract.id}`); // Pass agreement ID
+    navigate(`/preview/${contract.id}`); // Navigate to preview page
+  };
+
+  const handleTerminate = async () => {
+    if (!window.confirm("Are you sure you want to terminate this contract?")) return;
+
+    try {
+      const response = await fetch(`http://localhost:3000/contracts/${contract.id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        alert("Contract terminated successfully.");
+        onDelete(contract.id); // Remove contract from UI
+      } else {
+        alert("Failed to terminate contract.");
+      }
+    } catch (error) {
+      console.error("Error deleting contract:", error);
+      alert("An error occurred. Please try again.");
+    }
   };
 
   return (
@@ -28,6 +48,7 @@ const ContractCard = ({ contract }) => {
           </button>
           {userRole === "Founder" && (
             <button 
+              onClick={handleTerminate} 
               className="px-4 py-2 bg-red-500 text-white text-sm rounded hover:bg-red-600"
             >
               Terminate

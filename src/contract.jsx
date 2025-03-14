@@ -83,16 +83,30 @@ const handleSend = () => {
   };
 
   // Handle signature upload
-  const handleSignatureUpload = (event) => {
+  const handleSignatureUpload = async (event) => {
     const file = event.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      if (currentSigner === "Founder") {
-        setFounderSignature(imageUrl);
+    if (!file || !userId) return;
+  
+    const formData = new FormData();
+    formData.append("profileImage", file);
+  
+    try {
+      const response = await axios.post("http://localhost:3000/upload-signature", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+  
+      if (response.data?.imageUrl) {
+        if (currentSigner === "Founder") {
+          setFounderSignature(response.data.imageUrl);
+        } else {
+          setCollaboratorSignature(response.data.imageUrl);
+        }
+        setShowSignatureModal(false);
       } else {
-        setCollaboratorSignature(imageUrl);
+        console.error("No imageUrl returned from server");
       }
-      setShowSignatureModal(false);
+    } catch (error) {
+      console.error("Error uploading signature:", error);
     }
   };
 
