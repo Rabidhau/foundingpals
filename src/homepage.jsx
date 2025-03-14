@@ -20,9 +20,9 @@ const Homepage = () => {
 
   useEffect(() => {
     if (!userId) return;
-  
+
     const endpoint = role === "Founder" ? "/get-accepted-Users" : "/get-accepted-Idea";
-  
+
     axios
       .get(`http://localhost:3000${endpoint}`, { params: { userId } })
       .then((response) => {
@@ -31,7 +31,7 @@ const Homepage = () => {
       .catch((error) => {
         console.error("Error fetching ideas:", error);
       });
-  
+
     axios
       .get(`http://localhost:3000/get-friend`, { params: { userId } })
       .then((response) => {
@@ -40,12 +40,12 @@ const Homepage = () => {
       .catch((error) => {
         console.error("Error fetching pals:", error);
       });
-  
+
     // Fetch contracts
     if (userName && role) {
       axios
         .get("http://localhost:3000/get-agreement", { 
-          params: { userName, userRole: role } // Use `role` instead of `userRole`
+          params: { userName, userRole: role }
         })
         .then((response) => {
           setContracts(response?.data.agreements || []);
@@ -55,6 +55,11 @@ const Homepage = () => {
         });
     }
   }, [role, userId, userName]);
+
+  // Function to remove contract after deletion
+  const handleDeleteContract = (contractId) => {
+    setContracts(contracts.filter(contract => contract.id !== contractId));
+  };
 
   const filteredIdeas = IdeaList.filter((list) => list.acceptedStatus === 1);
   const displayedIdeas = showAllIdeas ? filteredIdeas : filteredIdeas.slice(0, 2);
@@ -101,11 +106,17 @@ const Homepage = () => {
               </button>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-6">
-            {displayedContracts.map((contract) => (
-              <ContractCard key={contract.id} contract={contract} />
-            ))}
-          </div>
+
+          {/* Show message if no contracts exist */}
+          {contracts.length === 0 ? (
+            <p className="text-gray-500 text-center">No contracts available</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-6">
+              {displayedContracts.map((contract) => (
+                <ContractCard key={contract.id} contract={contract} onDelete={handleDeleteContract} />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Pals Section */}

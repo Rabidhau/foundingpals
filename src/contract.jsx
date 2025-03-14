@@ -83,30 +83,16 @@ const handleSend = () => {
   };
 
   // Handle signature upload
-  const handleSignatureUpload = async (event) => {
+  const handleSignatureUpload = (event) => {
     const file = event.target.files[0];
-    if (!file || !userId) return;
-  
-    const formData = new FormData();
-    formData.append("profileImage", file);
-  
-    try {
-      const response = await axios.post("http://localhost:3000/upload-signature", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-  
-      if (response.data?.imageUrl) {
-        if (currentSigner === "Founder") {
-          setFounderSignature(response.data.imageUrl);
-        } else {
-          setCollaboratorSignature(response.data.imageUrl);
-        }
-        setShowSignatureModal(false);
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      if (currentSigner === "Founder") {
+        setFounderSignature(imageUrl);
       } else {
-        console.error("No imageUrl returned from server");
+        setCollaboratorSignature(imageUrl);
       }
-    } catch (error) {
-      console.error("Error uploading signature:", error);
+      setShowSignatureModal(false);
     }
   };
 
@@ -369,16 +355,6 @@ const handleSend = () => {
               {/* Founder Section */}
               <div className="text-gray-700">
                 <p className="font-semibold">Founder:</p>
-                {founderSignature ? (
-                  <img src={founderSignature} alt="Founder Signature" className="h-12" />
-                ) : (
-                  <button
-                    onClick={() => handleOpenModal("Founder")}
-                    className="text-purple-600 font-semibold text-xl"
-                  >
-                    + Add Signature
-                  </button>
-                )}
                 <p>
                   Name:{" "}
                   <input
@@ -403,16 +379,6 @@ const handleSend = () => {
               {/* Collaborator Section */}
               <div className="text-gray-700">
                 <p className="font-semibold">Collaborator:</p>
-                {collaboratorSignature ? (
-                  <img src={collaboratorSignature} alt="Collaborator Signature" className="h-12" />
-                ) : (
-                  <button
-                    onClick={() => handleOpenModal("Collaborator")}
-                    className="text-purple-600 font-semibold text-xl"
-                  >
-                    + Add Signature
-                  </button>
-                )}
                 <p>
                   Name:{" "}
                   <input
@@ -447,33 +413,6 @@ const handleSend = () => {
           </div>
         </div>
       </div>
-
-      {/* Signature Modal */}
-      {showSignatureModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-            <h2 className="text-lg font-semibold mb-4 text-center">Sign contract</h2>
-            <div className="border-dashed border-2 border-gray-300 p-6 text-center">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleSignatureUpload}
-                className="hidden"
-                id="signature-upload"
-              />
-              <label htmlFor="signature-upload" className="cursor-pointer text-purple-600">
-                Click to upload
-              </label>
-            </div>
-            <button
-              onClick={() => setShowSignatureModal(false)}
-              className="mt-4 w-full bg-purple-600 text-white py-2 rounded-lg"
-            >
-              Confirm Signature
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Friend List Popup */}
       {showFriendListPopup && (
