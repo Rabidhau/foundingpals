@@ -23,6 +23,11 @@ import Messages from "./messages"
 import PalPage from "./palpage";
 import Success from "./success";
 import Preview from "./preview";
+import Dashboard from "./admin_dashboard";
+import Admin_idea from "./admin_ideas";
+import Messages_admin from "./admin_messages";
+import PalPage_admin from "./admin_pal";
+import Admin_contract from "./admin_contract";
 
 function App() {
   const router = createBrowserRouter([
@@ -45,6 +50,11 @@ function App() {
     { path: "/contracts/agreement", element: <Agreement /> },
     { path: "/pals", element: <PalPage /> },
     { path: "/success", element: <Success /> },
+    { path: "/admin_dashboard", element: <Dashboard /> },
+    { path: "/admin_idea", element: <Admin_idea /> },
+    { path: "/admin_messages", element: <Messages_admin /> },
+    { path: "/admin_pals", element: <PalPage_admin /> },
+    { path: "/admin_contract", element: <Admin_contract /> },
     { path: "/preview/:id", element: <Preview /> }
 
 
