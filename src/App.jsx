@@ -28,6 +28,7 @@ import Admin_idea from "./admin_ideas";
 import Messages_admin from "./admin_messages";
 import PalPage_admin from "./admin_pal";
 import Admin_contract from "./admin_contract";
+import ForgetPassword from "./forgetpassword";
 
 function App() {
   const router = createBrowserRouter([
@@ -55,7 +56,9 @@ function App() {
     { path: "/admin_messages", element: <Messages_admin /> },
     { path: "/admin_pals", element: <PalPage_admin /> },
     { path: "/admin_contract", element: <Admin_contract /> },
+    { path: "/forgot-password", element: <ForgetPassword /> },
     { path: "/preview/:id", element: <Preview /> }
+
 
 
   ]);
