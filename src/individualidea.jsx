@@ -143,77 +143,104 @@ const IndividualIdea = () => {
   </>
 )}
 
-        {userRole === "Founder" && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-4">Applied Talents</h2>
-            {appliedTalents.length > 0 ? (
-              <table className="min-w-full bg-white border border-gray-300 shadow-md rounded-lg">
-                <thead className="bg-gray-100 text-gray-700">
-                  <tr>
-                    <th className="py-3 px-4 border-b text-left">Name</th>
-                    <th className="py-3 px-4 border-b text-left">Email</th>
-                    <th className="py-3 px-4 border-b text-left">Status</th>
-                    <th className="py-3 px-4 border-b text-left">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                {appliedTalents.map((talent) => {
-  let statusText, statusClass;
+{userRole === "Founder" && (
+  <div className="mt-8">
+    <h2 className="text-2xl font-bold mb-4">Applied Talents</h2>
+    {appliedTalents.length > 0 ? (
+      <table className="min-w-full bg-white border border-gray-300 shadow-md rounded-lg">
+        <thead className="bg-gray-100 text-gray-700">
+          <tr>
+            <th className="py-3 px-4 border-b text-left">Name</th>
+            <th className="py-3 px-4 border-b text-left">Bio</th>
+            <th className="py-3 px-4 border-b text-left">Email</th>
+            <th className="py-3 px-4 border-b text-left">Qualifications</th>
+            <th className="py-3 px-4 border-b text-left">Status</th>
+            <th className="py-3 px-4 border-b text-left">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {appliedTalents.map((talent) => {
+            let statusText, statusClass;
 
-  if (talent.status === 1) {
-    statusText = "Accepted";
-    statusClass = "text-green-700 border-green-300 bg-green-100";
-  } else if (talent.status === 0) {
-    statusText = "Rejected";
-    statusClass = "text-red-700 border-red-300 bg-red-100";
-  } else {
-    statusText = "Pending";
-    statusClass = "text-yellow-700 border-yellow-300 bg-yellow-100";
-  }
+            // Determine status text and class based on talent status
+            if (talent.status === 1) {
+              statusText = "Accepted";
+              statusClass = "text-green-700 border-green-300 bg-green-100";
+            } else if (talent.status === 0) {
+              statusText = "Rejected";
+              statusClass = "text-red-700 border-red-300 bg-red-100";
+            } else {
+              statusText = "Pending";
+              statusClass = "text-yellow-700 border-yellow-300 bg-yellow-100";
+            }
 
-  return (
-    <tr key={talent.id} className="hover:bg-gray-50 transition">
-      <td className="py-3 px-4 border-b">{talent.name}</td>
-      <td className="py-3 px-4 border-b">{talent.email}</td>
-      <td className="py-3 px-4 border-b ">
-        <span className={`px-3 py-1 border rounded-full ${statusClass}`}>
-          {statusText}
-        </span>
-      </td>
-                        <td className="py-3 px-4 border-b">
-                          {talent.status === null ? (
-                            <>
-                              {showReasonInput[talent.id] ? (
-                                <div className="flex items-center">
-                                  <textarea
-                                    className="border rounded p-2 mr-2"
-                                    placeholder="Enter rejection reason"
-                                    value={rejectionReasons[talent.id] || ""}
-                                    onChange={(e) =>
-                                      setRejectionReasons({ ...rejectionReasons, [talent.id]: e.target.value })
-                                    }
-                                  />
-                                  <button className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600" onClick={() => handleAcceptReject(talent.id, 0)}>
-                                    Submit
-                                  </button>
-                                </div>
-                              ) : (
-                                <>
-                                  <button className="bg-green-500 text-white px-4 py-1 rounded mr-2 hover:bg-green-600" onClick={() => handleAcceptReject(talent.id, 1)}>Accept</button>
-                                  <button className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600" onClick={() => setShowReasonInput({ ...showReasonInput, [talent.id]: true })}>Reject</button>
-                                </>
-                              )}
-                            </>
-                          ) : <span className="text-gray-500">Decision Made</span>}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            ) : <p className="text-gray-500">No talents have applied yet.</p>}
-          </div>
-        )}
+            return (
+              <tr key={talent.id} className="hover:bg-gray-50 transition">
+                <td className="py-3 px-4 border-b">{talent.name}</td>
+                <td className="py-3 px-4 border-b">{talent.bio}</td>
+                <td className="py-3 px-4 border-b">{talent.email}</td>
+                <td className="py-3 px-4 border-b">{talent.qualification}</td>
+                <td className="py-3 px-4 border-b ">
+                  <span className={`px-3 py-1 border rounded-full ${statusClass}`}>
+                    {statusText}
+                  </span>
+                </td>
+                <td className="py-3 px-4 border-b">
+                  {talent.status === null ? (
+                    <>
+                      {showReasonInput[talent.id] ? (
+                        <div className="flex items-center">
+                          <textarea
+                            className="border rounded p-2 mr-2"
+                            placeholder="Enter rejection reason"
+                            value={rejectionReasons[talent.id] || ""}
+                            onChange={(e) =>
+                              setRejectionReasons({
+                                ...rejectionReasons,
+                                [talent.id]: e.target.value,
+                              })
+                            }
+                          />
+                          <button
+                            className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
+                            onClick={() => handleAcceptReject(talent.id, 0)}
+                          >
+                            Submit
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            className="bg-green-500 text-white px-4 py-1 rounded mr-2 hover:bg-green-600"
+                            onClick={() => handleAcceptReject(talent.id, 1)}
+                          >
+                            Accept
+                          </button>
+                          <button
+                            className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+                            onClick={() =>
+                              setShowReasonInput({ ...showReasonInput, [talent.id]: true })
+                            }
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <span className="text-gray-500">Decision Made</span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    ) : (
+      <p>No applied talents found.</p>
+    )}
+  </div>
+)}
       </div>
     </main>
   );

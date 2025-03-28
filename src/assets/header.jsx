@@ -48,7 +48,9 @@ const Header = () => {
   const handleIdeaClick = () => {
     navigate("/create-idea");
   };
-
+  const handleUpdateRedirect = () => {
+    navigate("/profile-page");
+  };
   // Handle file upload
   const handleUploadClick = async (event) => {
     const file = event.target.files[0];
@@ -132,7 +134,9 @@ const Header = () => {
               <label htmlFor="uploadProfile" className="block text-sm text-gray-700 p-2 hover:bg-gray-100 cursor-pointer">
                 Upload Image
               </label>
-              <button className="w-full text-left text-sm text-gray-700 p-2 hover:bg-gray-100 rounded">
+              <button 
+              onClick={handleUpdateRedirect}
+              className="w-full text-left text-sm text-gray-700 p-2 hover:bg-gray-100 rounded">
                 Update Profile
               </button>
             </div>

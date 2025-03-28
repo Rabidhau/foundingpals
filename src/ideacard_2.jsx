@@ -86,8 +86,8 @@ const Idea_Card = ({ props }) => {
                   value={completionPercent}
                   onChange={(e) => setCompletionPercent(Number(e.target.value))}
                 >
-                  {[...Array(11)].map((_, i) => (
-                    <option key={i} value={i * 10}>{i * 10}%</option>
+                  {[...Array(21)].map((_, i) => (
+                    <option key={i} value={i * 10}>{i * 5}%</option>
                   ))}
                 </select>
 
