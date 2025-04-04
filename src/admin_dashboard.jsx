@@ -209,6 +209,8 @@ const Dashboard = () => {
                     </>
                   ) : (
                     <>
+                    <th className="pb-2">Bio</th>
+                    <th className="pb-2">Qualification</th>
                       <th className="pb-2">Accepted Ideas</th>
                       <th className="pb-2">Rejected Ideas</th>
                     </>
@@ -252,6 +254,8 @@ const Dashboard = () => {
                         </>
                       ) : (
                         <>
+                          <td className="px-5">{user.bio}</td>
+                          <td className="px-5">{user.qualification}</td>
                           <td className="px-5">{(acceptedIdeasMap[user.userId] || []).length}</td>
                           <td className="px-5">{(rejectedIdeasMap[user.userId] || []).length}</td>
                         </>

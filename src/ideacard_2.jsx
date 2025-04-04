@@ -40,8 +40,8 @@ const Idea_Card = ({ props }) => {
   return (
     <div className="mx-auto w-full bg-white shadow-md rounded-lg overflow-hidden hover:rounded-xl hover:shadow-slate-300 transition-all">
       <div className="px-4 py-6">
-        <h2 className="text-lg font-semibold text-gray-800">{props.ideaTitle}</h2>
-        <span className="text-xs">{props.ideaInfo}</span>
+        <h2 className="text-2xl font-semibold text-gray-800">{props.ideaTitle}</h2>
+        <span className=" text-gray-500">{props.ideaInfo}</span>
 
         <div className="mt-4 flex gap-4">
           <p className="text-sm bg-purple-200 p-2 rounded text-purple-600">{props.equity}</p>
@@ -53,8 +53,8 @@ const Idea_Card = ({ props }) => {
             {!editMode ? (
               <>
                 {/* Display Mode */}
-                <p className="text-sm text-gray-700"><strong>Comment:</strong> {props.comment}</p>
-                <p className="text-sm text-gray-700"><strong>Completion:</strong> {props.completion}%</p>
+                <p className="text-gray-700"><strong>Comment:</strong> {props.comment}</p>
+                <p className="text-gray-700"><strong>Completion:</strong> {props.completion}%</p>
 
                 {userRole === "Talent" && (
   <button
@@ -82,14 +82,15 @@ const Idea_Card = ({ props }) => {
 
                 <label className="block text-sm font-medium text-gray-700 mt-2">Completion Percentage:</label>
                 <select
-                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  value={completionPercent}
-                  onChange={(e) => setCompletionPercent(Number(e.target.value))}
-                >
-                  {[...Array(21)].map((_, i) => (
-                    <option key={i} value={i * 10}>{i * 5}%</option>
-                  ))}
-                </select>
+  className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+  value={completionPercent}
+  onChange={(e) => setCompletionPercent(Number(e.target.value))}
+>
+  {[...Array(21)].map((_, i) => (
+    <option key={i} value={i * 5}>{i * 5}%</option>
+  ))}
+</select>
+
 
                 <div className="flex gap-3 mt-4">
                   <button

@@ -76,7 +76,7 @@ const Homepage = () => {
         {/* Ideas Section */}
         <section className="mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-black">Your ideas</h2>
+            <h2 className="text-2xl font-semibold text-black">Your ideas</h2>
             {filteredIdeas.length > 2 && (
               <button
                 onClick={() => setShowAllIdeas(!showAllIdeas)}
@@ -96,7 +96,7 @@ const Homepage = () => {
         {/* Contracts Section */}
         <section className="mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-black">Your contracts</h2>
+            <h2 className="text-2xl font-semibold text-black">Your contracts</h2>
             {contracts.length > 2 && (
               <button
                 onClick={() => setShowAllContracts(!showAllContracts)}
@@ -111,7 +111,7 @@ const Homepage = () => {
           {contracts.length === 0 ? (
             <p className="text-gray-500 text-center">No contracts available</p>
           ) : (
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-3 gap-6">
               {displayedContracts.map((contract) => (
                 <ContractCard key={contract.id} contract={contract} onDelete={handleDeleteContract} />
               ))}
@@ -122,7 +122,7 @@ const Homepage = () => {
         {/* Pals Section */}
         <section>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-black">Your pals</h2>
+            <h2 className="text-2xl font-semibold text-black">Your pals</h2>
             {PalList.length > 2 && (
               <button
                 onClick={() => setShowAllPals(!showAllPals)}

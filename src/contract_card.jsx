@@ -78,13 +78,19 @@ const ContractCard = ({ contract, onDelete }) => {
   return (
     <div className="mx-auto w-full bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-all">
       {/* Contract Image */}
-      <img src="/images.png" alt="Contract" className="w-70 h-40 object-cover" />
+      
 
       <div className="p-4">
-        <h2 className="text-lg font-semibold text-gray-800">{contract.projectTitle}</h2>
-        <h2 className="text-lg font-light text-gray-400">{contract.projectDescription}</h2>
+        <div className="flex justify-between">
+          <div className="flex flex-col">
+          <h2 className="text-3xl font-semibold text-gray-800">{contract.projectTitle}</h2>
+          <h2 className="text-lg font-light text-gray-400">{contract.projectDescription}</h2>
+          </div>
 
-        {/* Buttons */}
+        <img src="/images.png" alt="Contract" className="w-20 h-30 object-cover" />
+        
+        </div>
+        
         <div className="mt-4 flex justify-between">
           <button 
             onClick={handlePreview} 

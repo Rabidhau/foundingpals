@@ -2,11 +2,12 @@ import { BellIcon } from "@heroicons/react/outline";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
+import { io } from "socket.io-client";
 
 const Header = () => {
   const navigate = useNavigate();
   const userRole = localStorage.getItem("userRole");
-  const userId = localStorage.getItem("userId"); // Ensure userId is available
+  const userId = localStorage.getItem("userId");
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showProfileOptions, setShowProfileOptions] = useState(false);
@@ -14,13 +15,41 @@ const Header = () => {
 
   const notificationRef = useRef(null);
   const profileRef = useRef(null);
+  const socketRef = useRef(null); // Store socket instance
 
   useEffect(() => {
-    // Fetch notifications from localStorage or API
-    const storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
-    setNotifications(storedNotifications);
+    // Fetch notifications from API on component mount
+    const fetchNotifications = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3000/notifications/${userId}`);
+        setNotifications(response.data.notifications);
+      } catch (error) {
+        console.error("Error fetching notifications", error);
+      }
+    };
 
-    // Set Profile Image
+    if (userId) {
+      fetchNotifications();
+
+      // Setup real-time notification listener
+      if (!socketRef.current) {
+        socketRef.current = io("http://localhost:3000");
+
+        socketRef.current.on("newNotification", (notif) => {
+          console.log("🔔 New notification received:", notif);
+          setNotifications((prev) => [notif, ...prev]); // Prepend new notification
+        });
+      }
+    }
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+    };
+  }, [userId]);
+  useEffect(() => {
     const storedImage = localStorage.getItem("profileImage");
     if (storedImage) {
       setProfileImage(`http://localhost:3000${storedImage}`);
@@ -51,6 +80,7 @@ const Header = () => {
   const handleUpdateRedirect = () => {
     navigate("/profile-page");
   };
+
   // Handle file upload
   const handleUploadClick = async (event) => {
     const file = event.target.files[0];
@@ -76,19 +106,14 @@ const Header = () => {
 
   return (
     <header className="flex justify-between items-center mb-6 relative">
-      {/* Greeting Text */}
       <h1 className="text-2xl font-semibold text-black">Good morning {localStorage.getItem("userName")} 👋</h1>
-
-      {/* Actions */}
       <div className="flex items-center space-x-6">
-        {/* New Idea Button */}
         {userRole === "Founder" && (
           <button onClick={handleIdeaClick} className="bg-indigo-600 text-white px-4 py-2 rounded">
             + New Idea
           </button>
         )}
 
-        {/* Notification Icon */}
         <button className="relative" onClick={toggleNotifications}>
           <BellIcon className="h-6 w-6 hover:text-gray-700" />
           {notifications.length > 0 && (
@@ -96,7 +121,6 @@ const Header = () => {
           )}
         </button>
 
-        {/* Notification Dropdown */}
         {showNotifications && (
           <div ref={notificationRef} className="absolute top-12 right-16 bg-white shadow-lg rounded-lg w-64 p-4 z-50 border">
             <h3 className="text-sm font-semibold mb-2">Notifications</h3>
@@ -104,7 +128,7 @@ const Header = () => {
               <ul>
                 {notifications.map((notif, index) => (
                   <li key={index} className="text-xs text-gray-600 p-2 border-b last:border-none">
-                    {notif}
+                    {notif.message}
                   </li>
                 ))}
               </ul>
@@ -114,31 +138,22 @@ const Header = () => {
           </div>
         )}
 
-        {/* Profile Icon */}
         <div className="relative">
           <div className="w-10 h-10 bg-gray-300 rounded-full overflow-hidden cursor-pointer" onClick={toggleProfileOptions}>
             <img src={profileImage || "/default-avatar.png"} alt="Profile" className="w-full h-full object-cover" />
           </div>
 
-          {/* Profile Options Dropdown */}
           {showProfileOptions && (
             <div ref={profileRef} className="absolute top-12 right-0 bg-white shadow-lg rounded-lg w-40 p-2 z-50 border">
-              {/* Hidden File Input */}
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                id="uploadProfile"
-                onChange={handleUploadClick}
-              />
+              <input type="file" accept="image/*" className="hidden" id="uploadProfile" onChange={handleUploadClick} />
               <label htmlFor="uploadProfile" className="block text-sm text-gray-700 p-2 hover:bg-gray-100 cursor-pointer">
                 Upload Image
               </label>
-              <button 
-              onClick={handleUpdateRedirect}
-              className="w-full text-left text-sm text-gray-700 p-2 hover:bg-gray-100 rounded">
-                Update Profile
-              </button>
+              {userRole !== "admin" && (
+                <button onClick={handleUpdateRedirect} className="w-full text-left text-sm text-gray-700 p-2 hover:bg-gray-100 rounded">
+                  Update Profile
+                </button>
+              )}
             </div>
           )}
         </div>
