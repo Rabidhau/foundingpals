@@ -6,14 +6,14 @@ const Message_card = ({ props, onClick }) => {
       <div className="flex items-center">
         {/* Profile Image */}
         <img
-          src={`http://localhost:3000${props.profile_image}`}
+   src={props.profile_image ? `http://localhost:3000${props.profile_image}` : "/default.avif"}
           alt="Profile"
           className="w-12 h-12 rounded-full object-cover"
         />
 
         {/* User Info */}
         <div className="flex flex-col ml-4 flex-1">
-          <h3 className="font-medium text-gray-800">{props.username}</h3>
+          <h3 className="font-medium text-gray-800">{props.username||props.group_name}</h3>
           <p className="text-gray-600 text-sm truncate max-w-xs">
             {props.lastMessage ? props.lastMessage : "No messages yet..."}
           </p>

@@ -25,41 +25,71 @@ const Chat_area = ({ chatData }) => {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    try {
-      await axios.post("http://localhost:3000/messages/send", {
-        roomId: chatData.roomId,
-        senderId: userId,
-        receiverId: chatData.userId,
-        message: input,
-      });
+    const payload = {
+      roomId: chatData.roomId,
+      senderId: userId,
+      message: input,
+      isGroup: chatData.isGroup,
+    };
 
-      setMessages([
-        ...messages,
-        {
-          sender: userId,
-          message: input,
-          createdAt: new Date().toISOString(),
-          senderProfileImage: userProfileImage,
-        },
-      ]);
-      setInput("");
+    // Add receiverId for one-to-one chats
+    if (!chatData.isGroup && chatData.userId) {
+      payload.receiverId = chatData.userId;
+    }
+    
+    // For group chat, add all group members' IDs to receiverIds (if any)
+    if (chatData.isGroup && chatData.groupMembersIds) {
+      payload.receiverIds = chatData.groupMembersIds; // Array of group member IDs
+    }
+
+    try {
+      // Send the message to the server
+      console.log("Sending message:", payload);
+      await axios.post("http://localhost:3000/messages/send", payload);
+
+      // Update the UI with the new message
+      if (chatData.isGroup) {
+        // For group chats, only add the message once
+        setMessages([
+          ...messages,
+          {
+            sender: userId,
+            message: input,
+            createdAt: new Date().toISOString(),
+            senderProfileImage: userProfileImage,
+          },
+        ]);
+      } else {
+        // For one-to-one chats, add the message normally
+        setMessages([
+          ...messages,
+          {
+            sender: userId,
+            message: input,
+            createdAt: new Date().toISOString(),
+            senderProfileImage: userProfileImage,
+          },
+        ]);
+      }
+      setInput(""); // Clear the input field
     } catch (err) {
-      console.error("Error sending message:", err);
+      console.error("Error sending message:", err.response?.data || err.message);
     }
   };
 
   return (
+
     <div className="flex flex-col h-full">
       {/* Chat Header with Profile Image */}
       <div className="p-4 bg-white border-b flex items-center">
         <img
-          src={chatData.profile_image ? `http://localhost:3000${chatData.profile_image}` : "/default-avatar.png"}
+          src={chatData.profile_image ? `http://localhost:3000${chatData.profile_image}` : "/default.avif"}
           alt="Profile"
           className="w-10 h-10 rounded-full mr-3"
         />
-        <h2 className="text-lg font-semibold">{chatData.username || "Chat"}</h2>
+        <h2 className="text-lg font-semibold">{chatData.username || chatData.group_name}</h2>
       </div>
-
+{console.log("Chat Data:", chatData)}
       {/* Chat Messages */}
       <div className="flex-1 overflow-y-auto p-4">
         {messages.map((msg, index) => {
@@ -68,7 +98,7 @@ const Chat_area = ({ chatData }) => {
             <div key={index} className={`mb-3 flex items-center ${isCurrentUser ? "justify-end" : "justify-start"}`}>
               {!isCurrentUser && (
                 <img
-                  src={chatData.profile_image ? `http://localhost:3000${chatData.profile_image}` : "/default-avatar.png"}
+                  src={chatData.profile_image ? `http://localhost:3000${chatData.profile_image}` : "/default.avif"}
                   alt="Sender"
                   className="w-8 h-8 rounded-full mr-2"
                 />
@@ -79,7 +109,7 @@ const Chat_area = ({ chatData }) => {
               </div>
               {isCurrentUser && (
                 <img
-                  src={userProfileImage ? `http://localhost:3000${userProfileImage}` : "/default-avatar.png"}
+                  src={userProfileImage ? `http://localhost:3000${userProfileImage}` : "/default.avif"}
                   alt="You"
                   className="w-8 h-8 rounded-full ml-2"
                 />
