@@ -117,46 +117,43 @@ const ContractPage = () => {
           </div>
         ) : userRole === "Talent" ? (
           <div>
-            <h2 className="text-2xl font-semibold text-black mb-4">Your Contracts</h2>
-            {agreements.length === 0 ? (
-              <p className="text-gray-500">No contracts found.</p>
-            ) : (
-              <table className="w-full border-collapse bg-white shadow-lg rounded-lg">
-                <thead>
-                  <tr className="text-left text-gray-500 bg-gray-200">
-                    <th className="py-2 px-4">Contract Title</th>
-                    <th className="py-2 px-4">Collaborator</th>
-                    <th className="py-2 px-4">Equity %</th>
-                    <th className="py-2 px-4">Status</th>
-                    <th className="py-2 px-4">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {agreements.map((agreement) => {
-                    const isPending = !agreement.collaboratorSignature; // ✅ Fixed extra semicolon
-                    return (
-                      <tr key={agreement.id} className="border-t hover:bg-gray-100">
-                        <td className="py-3 px-4">{agreement.projectTitle}</td>
-                        <td className="py-3 px-4">{agreement.collaboratorName}</td>
-                        <td className="py-3 px-4">{agreement.equityPercentage}%</td>
-                        <td className="py-3 px-4">
-                          <span className={`px-3 py-1 rounded-full ${isPending ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"}`}>
-                            {isPending ? "Pending" : "Complete"}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          {isPending && (
-                            <button className="text-blue-600 hover:underline" onClick={() => handleSignContract(agreement)}>
-                              Sign contract
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )}
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">Your Contracts</h2>
+
+{agreements.length === 0 ? (
+  <div className="text-center mt-20">
+    <img src="/empty-contracts.svg" alt="No Contracts" className="w-48 mx-auto mb-6" />
+    <p className="text-gray-500 text-lg">You don’t have any contracts yet. Once a founder sends one, it'll appear here.</p>
+  </div>
+) : (
+  <div className="grid md:grid-cols-2 gap-6">
+    {agreements.map((agreement) => {
+      const isPending = !agreement.collaboratorSignature;
+      return (
+        <div key={agreement.id} className="bg-white border rounded-xl shadow-md p-5 hover:shadow-lg transition">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-xl font-semibold text-gray-800">{agreement.projectTitle}</h3>
+            <span className={`text-sm font-medium px-3 py-1 rounded-full ${isPending ? "bg-yellow-100 text-yellow-700" : "bg-green-100 text-green-700"}`}>
+              {isPending ? "Pending" : "Signed"}
+            </span>
+          </div>
+          <p className="text-sm text-gray-600 mb-1"><strong>Collaborator:</strong> {agreement.collaboratorName}</p>
+          <p className="text-sm text-gray-600 mb-4"><strong>Equity:</strong> {agreement.equityPercentage}%</p>
+
+          {isPending ? (
+            <button
+              onClick={() => handleSignContract(agreement)}
+              className="w-full bg-purple-600 text-white py-2 rounded-lg mt-2 hover:bg-purple-700 transition"
+            >
+              Sign Contract
+            </button>
+          ) : (
+            <p className="text-sm text-gray-400 italic text-right">You’ve signed this contract</p>
+          )}
+        </div>
+      );
+    })}
+  </div>
+)}
           </div>
         ) : (
           <p className="text-gray-500 text-center">Unauthorized Access</p>

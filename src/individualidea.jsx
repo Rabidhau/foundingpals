@@ -108,139 +108,155 @@ const IndividualIdea = () => {
   }, []);
 
   return (
-    <main className="bg-gray-200 pt-20 px-20 pb-20">
-      <h1 className="text-4xl font-bold">Idea Detail</h1>
-      <div className="container mt-20 mx-auto px-4">
-        <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg overflow-hidden mb-4 p-4">
-          <h2 className="text-xl font-semibold">{ideaInfo.ideaTitle}</h2>
-          <p className="mt-4"><strong>Details:</strong> {ideaInfo.ideaInfo}</p>
-          <p className="mt-4"><strong>Requirements:</strong> {ideaInfo.requirements}</p>
-          <p className="mt-4"><strong>Stage:</strong> {ideaInfo.ideaStage}</p>
-          <p className="mt-4"><strong>Equity:</strong> {ideaInfo.equity}</p>
-
+    <main className="bg-gray-100 min-h-screen pt-20 px-8 pb-20">
+      <h1 className="text-5xl font-extrabold text-center text-indigo-700 mb-10">Idea Details</h1>
+  
+      <div className="container mx-auto max-w-5xl">
+        {/* Idea Card */}
+        <div className="bg-white shadow-xl rounded-2xl p-8 transition hover:shadow-2xl">
+          <h2 className="text-3xl font-semibold text-indigo-600 mb-2">{ideaInfo.ideaTitle}</h2>
+          <p className="text-gray-600 mt-2"><strong>Details:</strong> {ideaInfo.ideaInfo}</p>
+          <p className="text-gray-600 mt-2"><strong>Requirements:</strong> {ideaInfo.requirements}</p>
+          <p className="text-gray-600 mt-2"><strong>Stage:</strong> {ideaInfo.ideaStage}</p>
+          <p className="text-gray-600 mt-2"><strong>Equity:</strong> {ideaInfo.equity}</p>
+  
           {userRole === "Talent" && (
             <button
-              className={clsx(
-                "group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
-                dayjs(ideaInfo.submitBy).isBefore(new Date()) ? "bg-gray-600 pointer-events-none" : "bg-indigo-600"
-              )}
-              disabled={dayjs(ideaInfo.submitBy).isBefore(new Date())}
               onClick={handleApply}
+              disabled={dayjs(ideaInfo.submitBy).isBefore(new Date())}
+              className={clsx(
+                "mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-all",
+                dayjs(ideaInfo.submitBy).isBefore(new Date()) && "bg-gray-500 cursor-not-allowed"
+              )}
             >
               Apply Now
             </button>
           )}
         </div>
-
+  
+        {/* Recommended Ideas */}
         {userRole === "Talent" && (
-  <>
-    <h1 className="text-4xl font-bold mt-12 mb-8">Recommended Ideas</h1>
-    <div className="grid grid-cols-3 gap-5">
-      {ideaList.slice(0, 3).map((list) => (
-        <JobCard props={list} key={list.id} isExplorePage={isExplorePage} userRole={userRole} />
-      ))}
-    </div>
-  </>
-)}
-
-{userRole === "Founder" && (
-  <div className="mt-8">
-    <h2 className="text-2xl font-bold mb-4">Applied Talents</h2>
-    {appliedTalents.length > 0 ? (
-      <table className="min-w-full bg-white border border-gray-300 shadow-md rounded-lg">
-        <thead className="bg-gray-100 text-gray-700">
-          <tr>
-            <th className="py-3 px-4 border-b text-left">Name</th>
-            <th className="py-3 px-4 border-b text-left">Bio</th>
-            <th className="py-3 px-4 border-b text-left">Email</th>
-            <th className="py-3 px-4 border-b text-left">Qualifications</th>
-            <th className="py-3 px-4 border-b text-left">Status</th>
-            <th className="py-3 px-4 border-b text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {appliedTalents.map((talent) => {
-            let statusText, statusClass;
-
-            // Determine status text and class based on talent status
-            if (talent.status === 1) {
-              statusText = "Accepted";
-              statusClass = "text-green-700 border-green-300 bg-green-100";
-            } else if (talent.status === 0) {
-              statusText = "Rejected";
-              statusClass = "text-red-700 border-red-300 bg-red-100";
-            } else {
-              statusText = "Pending";
-              statusClass = "text-yellow-700 border-yellow-300 bg-yellow-100";
-            }
-
-            return (
-              <tr key={talent.id} className="hover:bg-gray-50 transition">
-                <td className="py-3 px-4 border-b">{talent.name}</td>
-                <td className="py-3 px-4 border-b">{talent.bio}</td>
-                <td className="py-3 px-4 border-b">{talent.email}</td>
-                <td className="py-3 px-4 border-b">{talent.qualification}</td>
-                <td className="py-3 px-4 border-b ">
-                  <span className={`px-3 py-1 border rounded-full ${statusClass}`}>
-                    {statusText}
-                  </span>
-                </td>
-                <td className="py-3 px-4 border-b">
-                  {talent.status === null ? (
-                    <>
-                      {showReasonInput[talent.id] ? (
-                        <div className="flex items-center">
-                          <textarea
-                            className="border rounded p-2 mr-2"
-                            placeholder="Enter rejection reason"
-                            value={rejectionReasons[talent.id] || ""}
-                            onChange={(e) =>
-                              setRejectionReasons({
-                                ...rejectionReasons,
-                                [talent.id]: e.target.value,
-                              })
-                            }
-                          />
-                          <button
-                            className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
-                            onClick={() => handleAcceptReject(talent.id, 0)}
-                          >
-                            Submit
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          <button
-                            className="bg-green-500 text-white px-4 py-1 rounded mr-2 hover:bg-green-600"
-                            onClick={() => handleAcceptReject(talent.id, 1)}
-                          >
-                            Accept
-                          </button>
-                          <button
-                            className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
-                            onClick={() =>
-                              setShowReasonInput({ ...showReasonInput, [talent.id]: true })
-                            }
-                          >
-                            Reject
-                          </button>
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    <span className="text-gray-500">Decision Made</span>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+          <>
+            <h2 className="text-3xl font-bold text-gray-800 mt-16 mb-6">Recommended Ideas</h2>
+            <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-6">
+            {[...ideaList]
+  .sort(() => Math.random() - 0.5) // shuffle the list
+  .slice(0, 3) // take first 3
+  .map((list) => (
+    <JobCard key={list.id} props={list} isExplorePage={isExplorePage} userRole={userRole} />
+))}
+            </div>
+          </>
+        )}
+  
+        {/* Founder View: Applied Talents */}
+        {userRole === "Founder" && (
+          <section className="mt-20">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">Applied Talents</h2>
+  
+            {appliedTalents.length > 0 ? (
+              <div className="overflow-x-auto rounded-xl border border-gray-300">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-indigo-50">
+                    <tr>
+                      {["Name", "Bio", "Email", "Qualifications", "Status", "Actions"].map((heading) => (
+                        <th
+                          key={heading}
+                          className="px-6 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider"
+                        >
+                          {heading}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-100">
+                    {appliedTalents.map((talent) => {
+                      let statusText, statusClass;
+  
+                      if (talent.status === 1) {
+                        statusText = "Accepted";
+                        statusClass = "text-green-600 bg-green-100";
+                      } else if (talent.status === 0) {
+                        statusText = "Rejected";
+                        statusClass = "text-red-600 bg-red-100";
+                      } else {
+                        statusText = "Pending";
+                        statusClass = "text-yellow-600 bg-yellow-100";
+                      }
+  
+                      return (
+                        <tr key={talent.id} className="hover:bg-gray-50 transition">
+                          <td className="px-6 py-4">{talent.name}</td>
+                          <td className="px-6 py-4">{talent.bio}</td>
+                          <td className="px-6 py-4">{talent.email}</td>
+                          <td className="px-6 py-4">{talent.qualification}</td>
+                          <td className="px-6 py-4">
+                            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusClass}`}>
+                              {statusText}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 space-x-2">
+  {talent.status === null ? (
+    showReasonInput[talent.id] ? (
+      <div className="flex flex-col gap-2">
+        <textarea
+          className="border p-2 rounded w-full text-sm"
+          placeholder="Enter rejection reason"
+          value={rejectionReasons[talent.id] || ""}
+          onChange={(e) =>
+            setRejectionReasons({
+              ...rejectionReasons,
+              [talent.id]: e.target.value,
+            })
+          }
+        />
+        <button
+          onClick={() => handleAcceptReject(talent.id, 0)}
+          className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+        >
+          Submit Rejection
+        </button>
+      </div>
     ) : (
-      <p>No applied talents found.</p>
-    )}
-  </div>
-)}
+      <div className="flex gap-2">
+        <button
+          className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+          onClick={() => handleAcceptReject(talent.id, 1)}
+        >
+          Accept
+        </button>
+        <button
+          className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+          onClick={() =>
+            setShowReasonInput({ ...showReasonInput, [talent.id]: true })
+          }
+        >
+          Reject
+        </button>
+      </div>
+    )
+  ) : talent.status === 1 ? (
+    <button
+      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+      onClick={() => navigate("/contracts/agreement")}
+    >
+      Create Agreement
+    </button>
+  ) : (
+    <span className="text-gray-400 italic">Decision Made</span>
+  )}
+</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-gray-600">No applied talents found.</p>
+            )}
+          </section>
+        )}
       </div>
     </main>
   );
