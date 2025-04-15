@@ -114,7 +114,7 @@ const Homepage = () => {
                 <p className="text-gray-500 text-lg">No contracts available</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {displayedContracts.map((contract) => (
                   <ContractCard key={contract.id} contract={contract} onDelete={handleDeleteContract} />
                 ))}

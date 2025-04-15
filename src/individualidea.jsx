@@ -113,26 +113,43 @@ const IndividualIdea = () => {
   
       <div className="container mx-auto max-w-5xl">
         {/* Idea Card */}
-        <div className="bg-white shadow-xl rounded-2xl p-8 transition hover:shadow-2xl">
-          <h2 className="text-3xl font-semibold text-indigo-600 mb-2">{ideaInfo.ideaTitle}</h2>
-          <p className="text-gray-600 mt-2"><strong>Details:</strong> {ideaInfo.ideaInfo}</p>
-          <p className="text-gray-600 mt-2"><strong>Requirements:</strong> {ideaInfo.requirements}</p>
-          <p className="text-gray-600 mt-2"><strong>Stage:</strong> {ideaInfo.ideaStage}</p>
-          <p className="text-gray-600 mt-2"><strong>Equity:</strong> {ideaInfo.equity}</p>
-  
-          {userRole === "Talent" && (
-            <button
-              onClick={handleApply}
-              disabled={dayjs(ideaInfo.submitBy).isBefore(new Date())}
-              className={clsx(
-                "mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-all",
-                dayjs(ideaInfo.submitBy).isBefore(new Date()) && "bg-gray-500 cursor-not-allowed"
-              )}
-            >
-              Apply Now
-            </button>
-          )}
-        </div>
+{/* Idea Card with Profile on the Left */}
+<div className="bg-white shadow-xl rounded-2xl p-8 transition hover:shadow-2xl flex flex-col lg:flex-row gap-8">
+  {/* Founder Profile Section */}
+  <div className="w-full lg:w-1/3 flex flex-col items-center text-center border-r border-gray-200 pr-4">
+    <img
+      src={`http://localhost:3000${ideaInfo.profile_image}`} // fallback image
+      alt="Founder"
+      className="w-32 h-32 object-cover rounded-full mb-4 shadow-md"
+    />
+    <h3 className="text-xl font-semibold text-indigo-700">{ideaInfo.username}</h3>
+    <p className="text-gray-600 text-sm mt-1">{ideaInfo.bio}</p>
+    <p className="text-gray-500 text-sm mt-1">{ideaInfo.qualification}</p>
+    <p className="text-gray-400 text-sm mt-1">{ideaInfo.email}</p>
+  </div>
+
+  {/* Idea Information Section */}
+  <div className="w-full lg:w-2/3">
+    <h2 className="text-3xl font-semibold text-indigo-600 mb-2">{ideaInfo.ideaTitle}</h2>
+    <p className="text-gray-600 mt-2"><strong>Details:</strong> {ideaInfo.ideaInfo}</p>
+    <p className="text-gray-600 mt-2"><strong>Requirements:</strong> {ideaInfo.requirements}</p>
+    <p className="text-gray-600 mt-2"><strong>Stage:</strong> {ideaInfo.ideaStage}</p>
+    <p className="text-gray-600 mt-2"><strong>Equity:</strong> {ideaInfo.equity}</p>
+
+    {userRole === "Talent" && (
+      <button
+        onClick={handleApply}
+        disabled={dayjs(ideaInfo.submitBy).isBefore(new Date())}
+        className={clsx(
+          "mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-all",
+          dayjs(ideaInfo.submitBy).isBefore(new Date()) && "bg-gray-500 cursor-not-allowed"
+        )}
+      >
+        Apply Now
+      </button>
+    )}
+  </div>
+</div>
   
         {/* Recommended Ideas */}
         {userRole === "Talent" && (
