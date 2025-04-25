@@ -19,7 +19,7 @@ const Sidebar_admin = () => {
     { name: "Ideas", icon: <LightBulbIcon className="h-5 w-5 mr-2" />, path: "/admin_idea" },
     { name: "Messages", icon: <ChatIcon className="h-5 w-5 mr-2" />, path: "/admin_messages" },
     { name: "Contracts", icon: <DocumentIcon className="h-5 w-5 mr-2" />, path: "/admin_contract" },
-    { name: "Pals", icon: <UserGroupIcon className="h-5 w-5 mr-2" />, path: "/admin_pals" },
+
   ];
 
   // Function to handle logout

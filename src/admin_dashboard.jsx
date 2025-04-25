@@ -200,12 +200,13 @@ const Dashboard = () => {
           <div className="bg-white shadow-md rounded-lg p-6">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-gray-500 border-b">
+                <tr className="text-left text-gray-500 border-b font-semibold"> 
                   <th className="pb-2">User</th>
                   {activeTab === "Founder" ? (
                     <>
                       <th className="pb-2">Contracts</th>
                       <th className="pb-2">Ideas Posted</th>
+                      <th className="pb-2">Message</th>
                     </>
                   ) : (
                     <>
@@ -213,6 +214,7 @@ const Dashboard = () => {
                     <th className="pb-2">Qualification</th>
                       <th className="pb-2">Accepted Ideas</th>
                       <th className="pb-2">Rejected Ideas</th>
+                      <th className="pb-2">Message</th>
                     </>
                   )}
                 </tr>

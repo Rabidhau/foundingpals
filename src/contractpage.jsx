@@ -103,8 +103,7 @@ const ContractPage = () => {
 
         {loading ? (
           <p className="text-gray-500 text-center">Loading...</p>
-        ) : error ? (
-          <p className="text-red-500 text-center">{error}</p>
+        
         ) : userRole === "Founder" ? (
           <div className="mt-40 text-center">
             <h2 className="text-3xl font-bold text-black mb-4">Contracts & Simple E-Signing</h2>
@@ -121,7 +120,7 @@ const ContractPage = () => {
 
 {agreements.length === 0 ? (
   <div className="text-center mt-20">
-    <img src="/empty-contracts.svg" alt="No Contracts" className="w-48 mx-auto mb-6" />
+    <img src="/no_contract.png" alt="No Contracts" className="w-48 mx-auto mb-6" />
     <p className="text-gray-500 text-lg">You don’t have any contracts yet. Once a founder sends one, it'll appear here.</p>
   </div>
 ) : (

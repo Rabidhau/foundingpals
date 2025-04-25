@@ -4,9 +4,6 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-
-
-
 const Collab = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -27,8 +24,8 @@ const Collab = () => {
 
   const handleSubmit = async () => {
     if (!validateEquity()) return;
-
     setLoading(true);
+
     try {
       const userId = localStorage.getItem("userId");
       await axios.post("http://localhost:3000/create-idea", {
@@ -39,7 +36,7 @@ const Collab = () => {
       });
 
       toast.success("Project activated successfully!");
-      navigate("/my-ideas");
+      navigate("/my-ideas/active");
     } catch (error) {
       toast.error("Error activating project. Please try again.");
       console.error("Submission error:", error);
@@ -49,172 +46,120 @@ const Collab = () => {
   };
 
   const handleArchive = async () => {
-    console.log("Archive button clicked"); // Debugging
     setLoading(true);
     try {
       const userId = localStorage.getItem("userId");
-      const response = await axios.post("http://localhost:3000/create-idea", {
+      await axios.post("http://localhost:3000/create-idea", {
         userId,
         ...formData,
         equity,
         status: false,
       });
-  
+
       toast.success("Project archived successfully.");
       navigate("/home");
     } catch (error) {
-      console.error("Submission error:", error);
       toast.error("Error archiving project. Please try again.");
+      console.error("Submission error:", error);
     } finally {
       setLoading(false);
     }
   };
-  
 
   return (
-    <div className="flex bg-white h-screen rounded-lg shadow-md p-8">
-      <div className="bg-white border-r border-gray-200 flex flex-col p-6">
-        <ul className="flex-1">
-          <li className="mb-10 text-xl font-light text-gray-700 transition duration-300 cursor-pointer p-4 rounded">
-            <div className="space-y-10">
-              <p>1. Details</p>
-              <p className="p-2 text-indigo-600 bg-gray-200 rounded">
-                2. Collaboration Terms
-              </p>
-            </div>
-          </li>
-        </ul>
-      </div>
+    <div className="flex bg-white h-screen  rounded-lg shadow-lg overflow-auto p-8">
+      {/* Sidebar */}
+      <div className="w-64 bg-white rounded-lg shadow-lg p-6 mr-10">
+          <ul className="space-y-10 text-gray-600">
+            <li>
+              <p className="text-indigo-600 text-2xl font-semibold">1. Details</p>
+            </li>
+            <li>
+              <p className="hover:text-indigo-600 text-2xl transition">2. Collaboration Terms</p>
+            </li>
+          </ul>
+        </div>
 
-      <div className="flex flex-col w-screen px-5 mt-6">
-        <h1 className="text-2xl font-bold mb-6">Collaboration Terms</h1>
-        <p>
-          This Collaboration Terms Agreement ("Agreement") is made on this day
-          between the Initiator and any potential Collaborator(s) interested in
-          contributing to the project.
+      {/* Main Content */}
+      <div className="flex flex-col flex-1 px-8">
+        <h1 className="text-3xl font-bold mb-6 text-gray-800">Collaboration Terms</h1>
+        <p className="text-gray-600 mb-8 leading-relaxed">
+          This Collaboration Terms Agreement ("Agreement") is made on this day between the Initiator and any potential Collaborator(s) interested in contributing to the project.
         </p>
 
-        <div className="grid grid-cols-1 gap-6">
-          {error && (
-            <div className="text-red-500 mx-auto text-sm text-center">
-              {error}
-            </div>
-          )}
+        <div className="space-y-10 text-gray-800 text-[15px]">
+          {error && <div className="text-red-500 text-sm">{error}</div>}
 
           {/* Project Overview */}
-          <div>
-            <label className="block text-xl mt-5 font-bold text-gray-700">
-              Project Overview
-            </label>
-            <ul className="list-disc ml-5">
-              <li>
-                <strong>Project Title:</strong> {formData.ideaTitle}
-              </li>
-              <li>
-                <strong>Project Description:</strong> {formData.ideaInfo}
-              </li>
-              <li>
-                <strong>Idea Type:</strong> {formData.ideaType}
-              </li>
-              <li>
-                <strong>Stage of Development:</strong> {formData.ideaStage}
-              </li>
+          <section>
+            <h2 className="text-xl font-semibold mb-3 border-b pb-1">Project Overview</h2>
+            <ul className="list-disc ml-6 space-y-1">
+              <li><strong>Title:</strong> {formData.ideaTitle}</li>
+              <li><strong>Description:</strong> {formData.ideaInfo}</li>
+              <li><strong>Type:</strong> {formData.ideaType}</li>
+              <li><strong>Stage:</strong> {formData.ideaStage}</li>
             </ul>
-          </div>
+          </section>
 
           {/* Roles & Responsibilities */}
-          <div>
-            <label className="block text-xl mt-5 font-bold text-gray-700">
-              Roles & Responsibilities
-            </label>
-            <ul className="list-disc ml-5">
-              <li>
-                <strong>Required Expertise:</strong> {formData.requirement}
-              </li>
-              <li>
-                The collaborator(s) shall actively participate in the
-                development, feedback, and execution of the project.
-              </li>
-              <li>
-                Any responsibilities assigned must be fulfilled within agreed
-                timelines.
-              </li>
+          <section>
+            <h2 className="text-xl font-semibold mb-3 border-b pb-1">Roles & Responsibilities</h2>
+            <ul className="list-disc ml-6 space-y-1">
+              <li><strong>Expertise Needed:</strong> {formData.requirement}</li>
+              <li>Collaborators actively contribute to development and execution.</li>
+              <li>Responsibilities should be completed within agreed timelines.</li>
             </ul>
-          </div>
+          </section>
 
-          {/* Equity Distribution & Ownership */}
-          <div>
-            <label className="block text-xl mt-5 font-bold text-gray-700">
-              Equity Distribution & Ownership
-            </label>
-            <ul className="list-disc ml-5">
+          {/* Equity Distribution */}
+          <section>
+            <h2 className="text-xl font-semibold mb-3 border-b pb-1">Equity Distribution & Ownership</h2>
+            <ul className="list-disc ml-6 space-y-1">
               <li>
                 <strong>Equity Share:</strong>
                 <input
                   type="text"
                   value={equity}
                   onChange={(e) => setEquity(e.target.value)}
-                  className="ml-2 border border-gray-300 rounded-md p-1 w-20"
-                  placeholder="e.g. 10%"
-                />
-                (to be mutually agreed upon by all parties).
+                  className="ml-2 border border-gray-300 rounded-md px-2 py-1 w-24 focus:ring-2 focus:ring-indigo-500"
+                  placeholder="e.g. 10"
+                />%
               </li>
-              <li>
-                Ownership of the project will be divided as per the
-                contributions made by each party.
-              </li>
-              <li>
-                Any modifications to the equity structure must be approved by
-                all stakeholders.
-              </li>
+              <li>Ownership is based on contributions.</li>
+              <li>Equity structure changes must be agreed upon.</li>
             </ul>
-          </div>
+          </section>
 
-          {/* Confidentiality & Intellectual Property */}
-          <div>
-            <label className="block text-xl mt-5 font-bold text-gray-700">
-              Confidentiality & Intellectual Property
-            </label>
-            <ul className="list-disc ml-5">
-              <li>
-                All discussions, documents, and intellectual property related to
-                the project must remain confidential.
-              </li>
-              <li>
-                Any IP generated shall remain the joint property of all
-                contributors unless otherwise specified.
-              </li>
+          {/* Confidentiality */}
+          <section>
+            <h2 className="text-xl font-semibold mb-3 border-b pb-1">Confidentiality & Intellectual Property</h2>
+            <ul className="list-disc ml-6 space-y-1">
+              <li>All project-related information remains confidential.</li>
+              <li>IP will be jointly owned unless otherwise stated.</li>
             </ul>
-          </div>
+          </section>
 
           {/* Dispute Resolution */}
-          <div>
-            <label className="block text-xl mt-5 font-bold text-gray-700">
-              Dispute Resolution
-            </label>
-            <ul className="list-disc ml-5">
-              <li>
-                Any conflicts or disputes shall be resolved through discussion
-                and, if necessary, through a third-party mediator.
-              </li>
+          <section>
+            <h2 className="text-xl font-semibold mb-3 border-b pb-1">Dispute Resolution</h2>
+            <ul className="list-disc ml-6 space-y-1">
+              <li>Conflicts will be resolved through discussions or third-party mediation.</li>
             </ul>
-          </div>
+          </section>
 
-          {/* Agreement Acceptance */}
-          <div className="flex justify-between mt-10">
+          {/* Buttons */}
+          <div className="flex justify-between pt-6 border-t">
             <button
-              type="button"
               onClick={handleArchive}
-              className="inline-flex justify-center rounded-md bg-gray-600 py-2 px-4 text-sm font-medium text-white hover:bg-gray-700"
               disabled={loading}
+              className="rounded-md bg-gray-600 text-white px-6 py-2 text-sm hover:bg-gray-700 transition disabled:opacity-50"
             >
               {loading ? "Archiving..." : "Archive"}
             </button>
             <button
-              type="button"
               onClick={handleSubmit}
-              className="inline-flex justify-center rounded-md bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700"
               disabled={loading}
+              className="rounded-md bg-indigo-600 text-white px-6 py-2 text-sm hover:bg-indigo-700 transition disabled:opacity-50"
             >
               {loading ? "Activating..." : "Activate"}
             </button>

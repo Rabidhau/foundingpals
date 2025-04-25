@@ -27,8 +27,6 @@ const Agreement = () => {
   const [collaboratorDate, setCollaboratorDate] = useState("");
 
   // State for signature modal
-  const [showSignatureModal, setShowSignatureModal] = useState(false);
-  const [currentSigner, setCurrentSigner] = useState("");
 
   // State for friend list popup
   const [friends, setFriends] = useState([]);
@@ -42,7 +40,7 @@ const Agreement = () => {
     address: founderAddress,
     title: projectTitle
   });
-
+const userId = localStorage.getItem("userId");
 // Function to fetch friends
 const getFriends = async () => {
   try {
@@ -76,28 +74,13 @@ const handleSend = () => {
   getFriends(); // Fetch friends list when clicking "Send Agreement"
 };
 
-  // Handle opening the signature modal
-  const handleOpenModal = (signer) => {
-    setCurrentSigner(signer);
-    setShowSignatureModal(true);
-  };
 
-  // Handle signature upload
-  const handleSignatureUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      if (currentSigner === "Founder") {
-        setFounderSignature(imageUrl);
-      } else {
-        setCollaboratorSignature(imageUrl);
-      }
-      setShowSignatureModal(false);
-    }
-  };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (Id) => {
+    console.log("Selected Friend ID:", Id);
     const agreementData = {
+      userId,
+      Id,
       effectiveDate,
       founderName,
       founderAddress,
@@ -117,6 +100,7 @@ const handleSend = () => {
       collaboratorSignature,
       collaboratorDate,
     };
+    console.log("Agreement Data:", agreementData);
   
     // Store agreement data in localStorage
     localStorage.setItem("agreementData", JSON.stringify(agreementData));
@@ -126,8 +110,9 @@ const handleSend = () => {
   };
 
 
-  const handleSendToFriend = (friend) => {
-    setSelectedFriend(friend);
+  const handleSendToFriend = (Id) => {
+    console.log("Sending to friend with ID:", Id);
+    setSelectedFriend(Id);
     setShowPopup(true);
   };
   const handlePaymentDecision = async (decision) => { 
@@ -430,7 +415,7 @@ const handleSend = () => {
 />
       <span className="mt-1 mx-4">@{friend.username}</span></div>
       <button
-        onClick={() => handleSendToFriend(friend.email)}
+        onClick={() => handleSendToFriend(friend.userId)}
         className="bg-purple-600 text-white px-4 py-1 rounded-lg"
       >
         Send
@@ -461,7 +446,7 @@ const handleSend = () => {
             </p>
             <div className="flex justify-center space-x-4">
               <button
-                onClick={() => handleSubmit()}
+                onClick={() => handleSubmit(selectedFriend)}
                 className="bg-green-500 text-white px-4 py-2 rounded-lg"
               >
                 Yes

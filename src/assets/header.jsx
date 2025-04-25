@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { io } from "socket.io-client";
+import { formatDistanceToNow } from "date-fns";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const Header = () => {
   const [notifications, setNotifications] = useState([]);
   const [showProfileOptions, setShowProfileOptions] = useState(false);
   const [profileImage, setProfileImage] = useState("");
+  const [hasUnread, setHasUnread] = useState(false);
 
   const notificationRef = useRef(null);
   const profileRef = useRef(null);
@@ -19,14 +21,16 @@ const Header = () => {
 
   useEffect(() => {
     // Fetch notifications from API on component mount
-    const fetchNotifications = async () => {
-      try {
-        const response = await axios.get(`http://localhost:3000/notifications/${userId}`);
-        setNotifications(response.data.notifications);
-      } catch (error) {
-        console.error("Error fetching notifications", error);
-      }
-    };
+   const fetchNotifications = async () => {
+  try {
+    const response = await axios.get(`http://localhost:3000/notifications/${userId}`);
+    const notifData = response.data.notifications;
+    setNotifications(notifData);
+    setHasUnread(notifData.some((notif) => notif.isUnread)); // check if any are unread
+  } catch (error) {
+    console.error("Error fetching notifications", error);
+  }
+};
 
     if (userId) {
       fetchNotifications();
@@ -57,8 +61,24 @@ const Header = () => {
   }, []);
 
   // Toggle dropdowns
-  const toggleNotifications = () => setShowNotifications(!showNotifications);
+ 
   const toggleProfileOptions = () => setShowProfileOptions(!showProfileOptions);
+
+  const toggleNotifications = async () => {
+    const newShow = !showNotifications;
+    setShowNotifications(newShow);
+  
+    if (newShow && hasUnread) {
+      try {
+        await axios.post(`http://localhost:3000/notifications/mark-read`, { userId });
+        setHasUnread(false); // Clear red dot
+        // Optionally update notification state too
+        setNotifications((prev) => prev.map(n => ({ ...n, isUnread: false })));
+      } catch (err) {
+        console.error("Error marking notifications as read", err);
+      }
+    }
+  };
 
   // Close dropdowns if clicked outside
   useEffect(() => {
@@ -116,9 +136,9 @@ const Header = () => {
 
         <button className="relative" onClick={toggleNotifications}>
           <BellIcon className="h-6 w-6 hover:text-gray-700" />
-          {notifications.length > 0 && (
-            <span className="absolute top-0 right-0 bg-red-500 h-2 w-2 rounded-full"></span>
-          )}
+          {hasUnread && (
+  <span className="absolute top-0 right-0 bg-red-500 h-2 w-2 rounded-full"></span>
+)}
         </button>
 
         {showNotifications && (
@@ -126,11 +146,14 @@ const Header = () => {
             <h3 className="text-sm font-semibold mb-2">Notifications</h3>
             {notifications.length > 0 ? (
               <ul>
-                {notifications.map((notif, index) => (
-                  <li key={index} className="text-xs text-gray-600 p-2 border-b last:border-none">
-                    {notif.message}
-                  </li>
-                ))}
+{notifications.map((notif, index) => (
+  <li key={index} className="text-xs text-gray-600 p-2 border-b last:border-none">
+    <div>You have a new <span className="font-medium">{notif.type}</span></div>
+    <div className="text-[10px] text-gray-400">
+      {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true })}
+    </div>
+  </li>
+))}
               </ul>
             ) : (
               <p className="text-xs text-gray-400">No new notifications</p>

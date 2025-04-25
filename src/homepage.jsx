@@ -76,23 +76,35 @@ const Homepage = () => {
         <div className="space-y-10">
           {/* Ideas Section */}
           <section>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-3xl font-bold text-gray-800">Your Ideas</h2>
-              {filteredIdeas.length > 2 && (
-                <button
-                  onClick={() => setShowAllIdeas(!showAllIdeas)}
-                  className="text-indigo-600 hover:underline font-medium"
-                >
-                  {showAllIdeas ? "Show less" : "View all"}
-                </button>
-              )}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {displayedIdeas.map((list) => (
-                <Idea_Card props={list} key={list.id} />
-              ))}
-            </div>
-          </section>
+  <div className="flex justify-between items-center mb-4">
+    <h2 className="text-3xl font-bold text-gray-800">Your Ideas</h2>
+    {filteredIdeas.length > 2 && (
+      <button
+        onClick={() => setShowAllIdeas(!showAllIdeas)}
+        className="text-indigo-600 hover:underline font-medium"
+      >
+        {showAllIdeas ? "Show less" : "View all"}
+      </button>
+    )}
+  </div>
+
+  {displayedIdeas.length > 0 ? (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {displayedIdeas.map((list) => (
+        <Idea_Card props={list} key={list.id} />
+      ))}
+    </div>
+  ) : (
+    <div className="text-center mt-10">
+      <img
+        src="/no_idea.png" 
+        alt="No ideas"
+        className="w-40 mx-auto mb-4 opacity-75"
+      />
+      <p className="text-gray-500 text-lg">No ideas available for display.</p>
+    </div>
+  )}
+</section>
   
           {/* Contracts Section */}
           <section>
@@ -100,7 +112,7 @@ const Homepage = () => {
               <h2 className="text-3xl font-bold text-gray-800">Your Contracts</h2>
               {contracts.length > 2 && (
                 <button
-                  onClick={() => setShowAllContracts(!showAllContracts)}
+                  onClick={() => (!showAllContracts)}
                   className="text-indigo-600 hover:underline font-medium"
                 >
                   {showAllContracts ? "Show less" : "View all"}
@@ -110,7 +122,7 @@ const Homepage = () => {
   
             {contracts.length === 0 ? (
               <div className="text-center mt-10">
-                <img src="/no-contracts.svg" alt="No contracts" className="w-40 mx-auto mb-4 opacity-75" />
+                <img src="/no_contract.png" alt="No contracts" className="w-40 mx-auto mb-4 opacity-75" />
                 <p className="text-gray-500 text-lg">No contracts available</p>
               </div>
             ) : (

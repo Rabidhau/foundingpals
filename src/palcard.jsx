@@ -20,7 +20,7 @@ const PalCard = ({ props }) => {
           setIsRequestSent(true);
         }
       } catch (error) {
-        console.error("Error checking friend request status:", error);
+        console.error("Error checking follow request status:", error);
       }
     };
 
@@ -48,10 +48,10 @@ const PalCard = ({ props }) => {
 
       if (response.status === 200) {
         setIsRequestSent(true);
-        toast.success("Friend request sent successfully! 🎉");
+        toast.success("Pal followed successfully! 🎉");
       }
     } catch (error) {
-      console.error("Error sending friend request:", error);
+      console.error("Error sending follow request:", error);
       toast.error("Request already sent. Please wait");
     }
   };

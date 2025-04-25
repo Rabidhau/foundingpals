@@ -5,6 +5,7 @@ import Sidebar from "./assets/sidebar";
 import Message_card from "./message_card";
 import Chat_area from "./chatarea";
 
+
 const Messages = () => {
   const [chatList, setChatList] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
@@ -134,7 +135,7 @@ const Messages = () => {
           {selectedChat ? (
             <Chat_area chatData={selectedChat} />
           ) : (
-            <p className="text-center mt-10 text-gray-500">Select a conversation</p>
+<p className="text-center mt-40 pt-40 text-gray-500">💬 No chat selected. Click on a user to start a conversation.</p>
           )}
         </div>
       </div>
