@@ -41,7 +41,6 @@ const Rejectedideas = () => {
     } catch (error) {
       console.error("Error fetching accepted ideas:", error);
       setRejectedList([]);
-      toast.error("Failed to load accepted ideas. Please try again.");
     }
   };
 

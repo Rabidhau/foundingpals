@@ -1,132 +1,126 @@
-import React, { useEffect,useState } from "react";
+import React, { useState } from "react";
 import Sidebar from "./assets/sidebar";
 import Subheader from "./assets/subheader";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-
 const Agreement = () => {
   // State for all input fields
-  const [effectiveDate, setEffectiveDate] = useState("");
-  const [founderName, setFounderName] = useState("");
-  const [founderAddress, setFounderAddress] = useState("");
-  const [founderEmail, setFounderEmail] = useState("");
-  const [collaboratorName, setCollaboratorName] = useState("");
-  const [collaboratorAddress, setCollaboratorAddress] = useState("");
-  const [collaboratorEmail, setCollaboratorEmail] = useState("");
-  const [projectTitle, setProjectTitle] = useState("");
-  const [projectDescription, setProjectDescription] = useState("");
-  const [founderResponsibilities, setFounderResponsibilities] = useState("");
-  const [collaboratorResponsibilities, setCollaboratorResponsibilities] = useState("");
-  const [equityPercentage, setEquityPercentage] = useState("");
-  const [vestingSchedule, setVestingSchedule] = useState("");
-  const [terminationNotice, setTerminationNotice] = useState("");
-  const [founderSignature, setFounderSignature] = useState("");
-  const [founderDate, setFounderDate] = useState("");
-  const [collaboratorSignature, setCollaboratorSignature] = useState("");
-  const [collaboratorDate, setCollaboratorDate] = useState("");
-
-  // State for signature modal
+  const [formData, setFormData] = useState({
+    effectiveDate: "",
+    founderName: localStorage.getItem("userName") || "",
+    founderAddress: "",
+    founderEmail: localStorage.getItem("userEmail") || "",
+    collaboratorName: "",
+    collaboratorAddress: "",
+    collaboratorEmail: "",
+    projectTitle: "",
+    projectDescription: "",
+    founderResponsibilities: "",
+    collaboratorResponsibilities: "",
+    equityPercentage: "",
+    vestingSchedule: "",
+    terminationNotice: "",
+    founderSignature: "",
+    founderDate: "",
+    collaboratorSignature: "",
+    collaboratorDate: "",
+  });
 
   // State for friend list popup
   const [friends, setFriends] = useState([]);
   const [showFriendListPopup, setShowFriendListPopup] = useState(false);
-  const [showPopup, setShowPopup] = useState(false);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState(null);
-  const [formData] = useState({
-    total: "1000",
-    email: localStorage.getItem("userEmail"),
-    name: localStorage.getItem("userName"),
-    address: founderAddress,
-    title: projectTitle
-  });
-const userId = localStorage.getItem("userId");
-// Function to fetch friends
-const getFriends = async () => {
-  try {
-    const userId = localStorage.getItem("userId");
-    if (!userId) {
-      console.error("No user ID found in localStorage.");
+  const userId = localStorage.getItem("userId");
+
+  // Handle input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Handle numeric input with validation
+  const handleNumericInput = (e, max) => {
+    const { name, value } = e.target;
+    if (value === "" || (Number(value) > 0 && Number(value) <= max)) {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  // Fetch friends list
+  const getFriends = async () => {
+    try {
+      if (!userId) {
+        console.error("No user ID found in localStorage.");
+        return;
+      }
+
+      const response = await axios.get("http://localhost:3000/get-friend", {
+        params: { userId },
+      });
+
+      if (Array.isArray(response.data)) {
+        setFriends(response.data);
+        setShowFriendListPopup(true);
+      } else {
+        console.error("Expected an array but got:", typeof response.data);
+        setFriends([]);
+      }
+    } catch (error) {
+      console.error("Error getting friends:", error);
+      toast.error("Failed to load friends list");
+      setFriends([]);
+    }
+  };
+
+  // Handle sending the agreement
+  const handleSend = () => {
+    // Validate required fields before proceeding
+    if (!formData.projectTitle || !formData.collaboratorName) {
+      toast.error("Please fill in required fields (Project Title and Collaborator Name)");
       return;
     }
+    getFriends();
+  };
 
-    const response = await axios.get("http://localhost:3000/get-friend", {
-      params: { userId },
-    });
-
-    console.log("API Response:", response.data);
-
-    if (Array.isArray(response.data)) { // Check if response.data is an array
-      setFriends(response.data); // Set the array directly
-      setShowFriendListPopup(true);
-    } else {
-      console.error("Expected an array but got:", typeof response.data);
-      setFriends([]); // Fallback
-    }
-  } catch (error) {
-    console.error("Error getting friends:", error);
-    setFriends([]); // Fallback
-  }
-};
-
-// Handle sending the agreement
-const handleSend = () => {
-  getFriends(); // Fetch friends list when clicking "Send Agreement"
-};
-
-
-
-  const handleSubmit = async (Id) => {
-    console.log("Selected Friend ID:", Id);
+  // Handle agreement submission
+  const handleSubmit = async (friendId) => {
     const agreementData = {
       userId,
-      Id,
-      effectiveDate,
-      founderName,
-      founderAddress,
-      founderEmail,
-      collaboratorName,
-      collaboratorAddress,
-      collaboratorEmail,
-      projectTitle,
-      projectDescription,
-      founderResponsibilities,
-      collaboratorResponsibilities,
-      equityPercentage,
-      vestingSchedule,
-      terminationNotice,
-      founderSignature,
-      founderDate,
-      collaboratorSignature,
-      collaboratorDate,
+      Id: friendId,
+      ...formData
     };
-    console.log("Agreement Data:", agreementData);
-  
-    // Store agreement data in localStorage
+    
+    // Store agreement data
     localStorage.setItem("agreementData", JSON.stringify(agreementData));
-  
-    // Redirect to payment gateway
-    handlePaymentDecision("yes");
+    
+    // Show payment confirmation
+    setShowPaymentPopup(true);
+    setShowFriendListPopup(false);
   };
 
-
-  const handleSendToFriend = (Id) => {
-    console.log("Sending to friend with ID:", Id);
-    setSelectedFriend(Id);
-    setShowPopup(true);
-  };
+  // Handle payment decision
   const handlePaymentDecision = async (decision) => { 
     if (decision === "yes") {
       try {
-        const response = await axios.post("http://localhost:3000/payment", formData);
+        const paymentData = {
+          total: "1000",
+          email: formData.founderEmail,
+          name: formData.founderName,
+          address: formData.founderAddress,
+          title: formData.projectTitle
+        };
+
+        const response = await axios.post("http://localhost:3000/payment", paymentData);
         const esewaData = response.data;
-  
-        // Redirect user to Esewa payment page with form data
+
+        // Redirect to payment
         const paymentUrl = `https://rc-epay.esewa.com.np/api/epay/main/v2/form`;
         const form = document.createElement("form");
         form.method = "POST";
         form.action = paymentUrl;
-  
+
         Object.keys(esewaData).forEach((key) => {
           const input = document.createElement("input");
           input.type = "hidden";
@@ -134,7 +128,7 @@ const handleSend = () => {
           input.value = esewaData[key];
           form.appendChild(input);
         });
-  
+
         document.body.appendChild(form);
         form.submit();
       } catch (error) {
@@ -142,8 +136,9 @@ const handleSend = () => {
         toast.error("Failed to initiate payment.");
       }
     }
-    setShowPopup(false);
+    setShowPaymentPopup(false);
   };
+
   return (
     <div className="flex h-screen w-screen bg-gray-50">
       {/* Sidebar */}
@@ -152,248 +147,256 @@ const handleSend = () => {
       {/* Main Content Area */}
       <div className="flex-1 p-6 overflow-y-auto">
         {/* Subheader */}
-        <div className="flex justify-between">
-          <h1 className="text-2xl font-semibold text-black mb-10">Contracts</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-800">Contracts</h1>
           <Subheader />
         </div>
 
-        {/* Centered Collaboration Agreement */}
-        <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
-          <div className="max-w-3xl w-full bg-white shadow-lg rounded-lg p-8">
-            {/* Title Section */}
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Collaboration Agreement</h1>
-            <p className="text-gray-600 mb-6">
-              This Collaboration Agreement (the "Agreement") is entered into as of{" "}
-              <input
-                type="text"
-                value={effectiveDate}
-                onChange={(e) => setEffectiveDate(e.target.value)}
-                placeholder="Effective Date"
-                className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-              />
-              , by and between:
-            </p>
-
-            {/* Founder & Collaborator Info */}
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-800">Founder:</h2>
-                <p className="text-gray-600">
-                  Name:{" "}
-                  <input
-                    type="text"
-                    value={founderName}
-                    onChange={(e) => setFounderName(e.target.value)}
-                    placeholder="Founder’s Full Name"
-                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-                  />
-                </p>
-                <p className="text-gray-600">
-                  Address:{" "}
-                  <input
-                    type="text"
-                    value={founderAddress}
-                    onChange={(e) => setFounderAddress(e.target.value)}
-                    placeholder="Founder’s Address"
-                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-                  />
-                </p>
-                <p className="text-gray-600">
-                  Email:{" "}
-                  <input
-                    type="email"
-                    value={founderEmail}
-                    onChange={(e) => setFounderEmail(e.target.value)}
-                    placeholder="Founder’s Email"
-                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-                  />
-                </p>
-              </div>
-
-              <div>
-                <h2 className="text-lg font-semibold text-gray-800">Collaborator:</h2>
-                <p className="text-gray-600">
-                  Name:{" "}
-                  <input
-                    type="text"
-                    value={collaboratorName}
-                    onChange={(e) => setCollaboratorName(e.target.value)}
-                    placeholder="Collaborator’s Full Name"
-                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-                  />
-                </p>
-                <p className="text-gray-600">
-                  Address:{" "}
-                  <input
-                    type="text"
-                    value={collaboratorAddress}
-                    onChange={(e) => setCollaboratorAddress(e.target.value)}
-                    placeholder="Collaborator’s Address"
-                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-                  />
-                </p>
-                <p className="text-gray-600">
-                  Email:{" "}
-                  <input
-                    type="email"
-                    value={collaboratorEmail}
-                    onChange={(e) => setCollaboratorEmail(e.target.value)}
-                    placeholder="Collaborator’s Email"
-                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-                  />
-                </p>
-              </div>
+        {/* Agreement Form */}
+        <div className="flex justify-center">
+          <div className="w-full  bg-white rounded-xl shadow-md overflow-hidden">
+            {/* Form Header */}
+            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white">
+              <h1 className="text-3xl font-bold">Collaboration Agreement</h1>
+              <p className="mt-2 opacity-90">
+                This agreement establishes terms between collaborators working on a joint project
+              </p>
             </div>
 
-            {/* Sections */}
-            <div className="mt-6 space-y-6">
-              <Section title="Project Overview">
-                <p>
-                  <strong>Title:</strong>{" "}
-                  <input
-                    type="text"
-                    value={projectTitle}
-                    onChange={(e) => setProjectTitle(e.target.value)}
-                    placeholder="Project Title"
-                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-                  />
+            {/* Form Content */}
+            <div className="p-8">
+              {/* Effective Date */}
+              <div className="mb-8">
+                <p className="text-gray-700 mb-4">
+                  This Collaboration Agreement (the "Agreement") is entered into as of
                 </p>
-                <p>
+                <div className="relative">
+<input
+  type="date"
+  name="effectiveDate"
+  value={formData.effectiveDate}
+  onChange={handleInputChange}
+  min={new Date().toISOString().split("T")[0]}
+  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+/>
+                </div>
+              </div>
+
+              {/* Parties Section */}
+              <div className="grid md:grid-cols-2 gap-8 mb-8">
+                {/* Founder Info */}
+                <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                  <h2 className="text-xl font-semibold text-purple-700 mb-4">Founder Information</h2>
+                  <FormField
+                    label="Full Name"
+                    name="founderName"
+                    value={formData.founderName}
+                    onChange={handleInputChange}
+                    required
+                  />
+                  <FormField
+                    label="Address"
+                    name="founderAddress"
+                    value={formData.founderAddress}
+                    onChange={handleInputChange}
+                  />
+                  <FormField
+                    label="Email"
+                    name="founderEmail"
+                    type="email"
+                    value={formData.founderEmail}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+
+                {/* Collaborator Info */}
+                <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                  <h2 className="text-xl font-semibold text-purple-700 mb-4">Collaborator Information</h2>
+                  <FormField
+                    label="Full Name"
+                    name="collaboratorName"
+                    value={formData.collaboratorName}
+                    onChange={handleInputChange}
+                    required
+                  />
+                  <FormField
+                    label="Address"
+                    name="collaboratorAddress"
+                    value={formData.collaboratorAddress}
+                    onChange={handleInputChange}
+                  />
+                  <FormField
+                    label="Email"
+                    name="collaboratorEmail"
+                    type="email"
+                    value={formData.collaboratorEmail}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Project Overview */}
+              <Section title="Project Overview" className="mb-8">
+                <FormField
+                  label="Project Title"
+                  name="projectTitle"
+                  value={formData.projectTitle}
+                  onChange={handleInputChange}
+                  required
+                />
+                <div className="mt-4">
+                  <label className="block text-gray-700 font-medium mb-2">Project Description</label>
                   <textarea
-                    value={projectDescription}
-                    onChange={(e) => setProjectDescription(e.target.value)}
-                    placeholder="Brief description of the project, including its objectives and scope"
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:border-purple-600"
-                    rows={3}
+                    name="projectDescription"
+                    value={formData.projectDescription}
+                    onChange={handleInputChange}
+                    placeholder="Describe the project objectives, scope, and deliverables"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                    rows={4}
                   />
-                </p>
+                </div>
               </Section>
 
-              <Section title="Roles and Responsibilities">
-                <p>
-                  <strong>Founder’s Responsibilities:</strong>{" "}
-                  <input
-                    type="text"
-                    value={founderResponsibilities}
-                    onChange={(e) => setFounderResponsibilities(e.target.value)}
-                    placeholder="Provide guidance, manage direction, etc."
-                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-                  />
-                </p>
-                <p>
-                  <strong>Collaborator’s Responsibilities:</strong>{" "}
-                  <input
-                    type="text"
-                    value={collaboratorResponsibilities}
-                    onChange={(e) => setCollaboratorResponsibilities(e.target.value)}
-                    placeholder="Contribute skills, perform tasks, etc."
-                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-                  />
-                </p>
+              {/* Roles and Responsibilities */}
+              <Section title="Roles and Responsibilities" className="mb-8">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Founder's Responsibilities</label>
+                    <textarea
+                      name="founderResponsibilities"
+                      value={formData.founderResponsibilities}
+                      onChange={handleInputChange}
+                      placeholder="List the founder's specific duties and obligations"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Collaborator's Responsibilities</label>
+                    <textarea
+                      name="collaboratorResponsibilities"
+                      value={formData.collaboratorResponsibilities}
+                      onChange={handleInputChange}
+                      placeholder="List the collaborator's specific duties and obligations"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                      rows={3}
+                    />
+                  </div>
+                </div>
               </Section>
 
-              <Section title="Equity and Compensation">
-                <p>
-                  <strong>Equity Distribution:</strong> The Collaborator receives{" "}
-                  <input
-                    type="text"
-                    value={equityPercentage}
-                    onChange={(e) => setEquityPercentage(e.target.value)}
-                    placeholder="Percentage"
-                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-                  />
-                  %.
-                </p>
-                <p>
-                  <strong>Vesting Schedule:</strong>{" "}
-                  <input
-                    type="text"
-                    value={vestingSchedule}
-                    onChange={(e) => setVestingSchedule(e.target.value)}
-                    placeholder="Details on equity vesting"
-                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-                  />
-                </p>
+              {/* Equity and Compensation */}
+              <Section title="Equity and Compensation" className="mb-8">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">
+                      Equity Percentage for Collaborator (%)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="equityPercentage"
+                        value={formData.equityPercentage}
+                        onChange={(e) => handleNumericInput(e, 100)}
+                        placeholder="0-100"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                      />
+                      <span className="absolute right-3 top-3 text-gray-500">%</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Vesting Schedule</label>
+                    <input
+                      type="text"
+                      name="vestingSchedule"
+                      value={formData.vestingSchedule}
+                      onChange={handleInputChange}
+                      placeholder="E.g., 4 years with 1-year cliff"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                    />
+                  </div>
+                </div>
               </Section>
 
-              <Section title="Confidentiality">
-                <p>Both parties agree to keep information confidential.</p>
+              {/* Termination */}
+              <Section title="Termination" className="mb-8">
+                <div className="flex items-center">
+                  <span className="text-gray-700 mr-2">Either party may terminate upon</span>
+                  <div className="w-20">
+                    <input
+                      type="text"
+                      name="terminationNotice"
+                      value={formData.terminationNotice}
+                      onChange={(e) => handleNumericInput(e, 365)}
+                      className="w-full p-2 border-b border-gray-300 focus:outline-none focus:border-purple-600 text-center"
+                    />
+                  </div>
+                  <span className="text-gray-700 ml-2">days' notice</span>
+                </div>
               </Section>
 
-              <Section title="Termination">
-                <p>
-                  Either party may terminate upon{" "}
-                  <input
-                    type="text"
-                    value={terminationNotice}
-                    onChange={(e) => setTerminationNotice(e.target.value)}
-                    placeholder="Number of days"
-                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-                  />{" "}
-                  days’ notice.
-                </p>
-              </Section>
-            </div>
+              {/* Signatures */}
+              <Section title="Signatures" className="mb-8">
+                <div className="grid md:grid-cols-2 gap-8">
+                  {/* Founder Signature */}
+                  <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                    <h3 className="font-semibold text-purple-700 mb-4">Founder</h3>
+                    <FormField
+                      label="Full Name"
+                      name="founderName"
+                      value={formData.founderName}
+                      onChange={handleInputChange}
+                    />
 
-            {/* Signatures */}
-            <div className="mt-8 border-t pt-6 flex justify-between">
-              {/* Founder Section */}
-              <div className="text-gray-700">
-                <p className="font-semibold">Founder:</p>
-                <p>
-                  Name:{" "}
-                  <input
-                    type="text"
-                    value={founderName}
-                    onChange={(e) => setFounderName(e.target.value)}
-                    placeholder="Founder’s Full Name"
-                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-                  />
-                </p>
-                <p>
-                  Date:{" "}
-                  <input
-                    type="date"
-                    value={founderDate}
-                    onChange={(e) => setFounderDate(e.target.value)}
-                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-                  />
-                </p>
+
+                    <div className="mt-4">
+                      <label className="block text-gray-700 font-medium mb-2">Date</label>
+                      <input
+                        type="date"
+                        name="founderDate"
+                        value={formData.founderDate}
+                        onChange={handleInputChange}
+                        min={new Date().toISOString().split("T")[0]}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Collaborator Signature */}
+                  <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                    <h3 className="font-semibold text-purple-700 mb-4">Collaborator</h3>
+                    <FormField
+                      label="Full Name"
+                      name="collaboratorName"
+                      value={formData.collaboratorName}
+                      onChange={handleInputChange}
+                    />
+                    <div className="mt-4">
+                      <label className="block text-gray-700 font-medium mb-2">Date</label>
+                      <input
+                        type="date"
+                        name="collaboratorDate"
+                        value={formData.collaboratorDate}
+                        onChange={handleInputChange}
+                        min={new Date().toISOString().split("T")[0]}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </Section>
+
+              {/* Submit Button */}
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={handleSend}
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-8 rounded-lg shadow-md transition duration-300 transform hover:scale-105"
+                >
+                  Send Agreement
+                </button>
               </div>
-
-              {/* Collaborator Section */}
-              <div className="text-gray-700">
-                <p className="font-semibold">Collaborator:</p>
-                <p>
-                  Name:{" "}
-                  <input
-                    type="text"
-                    value={collaboratorName}
-                    onChange={(e) => setCollaboratorName(e.target.value)}
-                    placeholder="Collaborator’s Full Name"
-                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-                  />
-                </p>
-                <p>
-                  Date:{" "}
-                  <input
-                    type="date"
-                    value={collaboratorDate}
-                    onChange={(e) => setCollaboratorDate(e.target.value)}
-                    className="border-b border-gray-300 focus:outline-none focus:border-purple-600"
-                  />
-                </p>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <div className="mt-8">
-              <button
-                onClick={handleSend}
-                className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700"
-              >
-                Send Agreement
-              </button>
             </div>
           </div>
         </div>
@@ -401,62 +404,92 @@ const handleSend = () => {
 
       {/* Friend List Popup */}
       {showFriendListPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-            <h2 className="text-lg font-semibold mb-4 text-center">Send Agreement To</h2>
-            <div className="space-y-2">
-            {Array.isArray(friends) && friends.length > 0 ? (
-  friends.map((friend) => (
-    <div key={friend.userId} className="flex  justify-between items-center p-2 border border-gray-200 rounded-lg">
-      <div className="flex"><img 
-  src={`http://localhost:3000${friend.profile_image}`} 
-  alt="Friend Profile" 
-  className="w-10 h-10 rounded-full object-cover"
-/>
-      <span className="mt-1 mx-4">@{friend.username}</span></div>
-      <button
-        onClick={() => handleSendToFriend(friend.userId)}
-        className="bg-purple-600 text-white px-4 py-1 rounded-lg"
-      >
-        Send
-      </button>
-    </div>
-  ))
-) : (
-  <p className="text-gray-600 text-center">No friends found.</p>
-)}
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-800">Select Collaborator</h2>
+              <button
+                onClick={() => setShowFriendListPopup(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-            <button
-              onClick={() => setShowFriendListPopup(false)}
-              className="mt-4 w-full bg-gray-300 text-black py-2 rounded-lg"
-            >
-              Cancel
-            </button>
+            
+            <div className="max-h-96 overflow-y-auto">
+              {Array.isArray(friends) && friends.length > 0 ? (
+                <ul className="space-y-3">
+                  {friends.map((friend) => (
+                    <li key={friend.userId} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center">
+                        <img 
+                          src={`http://localhost:3000${friend.profile_image}`} 
+                          alt="Profile" 
+                          className="w-10 h-10 rounded-full object-cover mr-3"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "https://via.placeholder.com/40";
+                          }}
+                        />
+                        <div>
+                          <p className="font-medium text-gray-800">@{friend.username}</p>
+                          <p className="text-sm text-gray-500">{friend.email}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleSubmit(friend.userId)}
+                        className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                      >
+                        Select
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-center py-8">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  <p className="mt-2 text-gray-600">No friends found</p>
+                  <p className="text-sm text-gray-500">Add friends to collaborate with them</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
-            {showPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-            <h3 className="text-lg font-semibold mb-4 text-center">
-              To share a contract, you need to make a payment first.
-            </h3>
-            <p className="text-center text-gray-600 mb-4">
-              Would you like to continue with the payment?
-            </p>
-            <div className="flex justify-center space-x-4">
-              <button
-                onClick={() => handleSubmit(selectedFriend)}
-                className="bg-green-500 text-white px-4 py-2 rounded-lg"
-              >
-                Yes
-              </button>
-              <button
-                onClick={() => handlePaymentDecision("no")}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg"
-              >
-                No
-              </button>
+
+      {/* Payment Confirmation Popup */}
+      {showPaymentPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full mx-4">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-purple-100">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="mt-3 text-lg font-medium text-gray-900">Payment Required</h3>
+              <div className="mt-2 text-sm text-gray-500">
+                <p>To share this contract, you need to complete a payment of NPR 1000.</p>
+                <p className="mt-2">Would you like to proceed to payment?</p>
+              </div>
+              <div className="mt-5 flex justify-center space-x-4">
+                <button
+                  onClick={() => handlePaymentDecision("no")}
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handlePaymentDecision("yes")}
+                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                >
+                  Proceed to Payment
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -465,11 +498,37 @@ const handleSend = () => {
   );
 };
 
+// Reusable Form Field Component
+const FormField = ({ label, name, type = "text", value, onChange, required = false, placeholder }) => (
+  <div className="mb-4">
+    <label className="block text-gray-700 font-medium mb-2">
+      {label}
+      {required && <span className="text-red-500 ml-1">*</span>}
+    </label>
+    <input
+      type={type}
+      name={name}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder || label}
+      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+      required={required}
+    />
+  </div>
+);
+
 // Reusable Section Component
-const Section = ({ title, children }) => (
-  <div>
-    <h2 className="text-xl font-semibold text-gray-800 mb-2">{title}</h2>
-    <div className="text-gray-600 space-y-2">{children}</div>
+const Section = ({ title, children, className = "" }) => (
+  <div className={`border-t border-gray-200 pt-6 ${className}`}>
+    <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+      <span className="bg-purple-100 text-purple-800 p-2 rounded-full mr-3">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+        </svg>
+      </span>
+      {title}
+    </h2>
+    <div className="text-gray-600 space-y-4">{children}</div>
   </div>
 );
 

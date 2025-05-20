@@ -38,8 +38,7 @@ const Archive = () => {
       });
 
       setIdeaList(response?.data || []);
-    } catch (error) {
-      toast.error("No archived ideas found.");
+    } catch (error) { 
       console.error("Error fetching ideas:", error);
       setIdeaList([]);
     }

@@ -154,7 +154,7 @@ const IndividualIdea = () => {
         {/* Recommended Ideas */}
         {userRole === "Talent" && (
           <>
-            <h2 className="text-3xl font-bold text-gray-800 mt-16 mb-6">Recommended Ideas</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mt-16 mb-6">More Ideas</h2>
             <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-6">
             {[...ideaList]
   .sort(() => Math.random() - 0.5) // shuffle the list

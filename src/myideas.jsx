@@ -52,7 +52,6 @@ const Myideas = () => {
     } catch (error) {
       console.error("Error fetching ideas:", error);
       setIdeaList([]);
-      toast.error("Failed to load ideas. Please try again.");
     }
   };
 
@@ -71,7 +70,6 @@ const Myideas = () => {
     } catch (error) {
       console.error("Error fetching accepted ideas:", error);
       setAcceptedList([]);
-      toast.error("Failed to load accepted ideas. Please try again.");
     }
   };
 

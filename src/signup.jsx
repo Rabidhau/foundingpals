@@ -32,22 +32,28 @@ const Signup = () => {
     setToken(e.target.value);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post("http://localhost:3000/signup", {
-        email,
-        fullName,
-        password,
-        selectedOption,
-        token,
-      });
-      setMessage(response.data);
-      navigate("/login")
-    } catch (error) {
-      setError(error.response.data);
-    }
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await axios.post("http://localhost:3000/signup", {
+      email,
+      fullName,
+      password,
+      selectedOption,
+      token,
+    });
+    
+    // Only extract the message
+    setMessage(response.data.message); 
+    setError(""); // Clear previous error
+    navigate("/login");
+  } catch (error) {
+    // Only extract the error message
+    const errorMessage = error.response?.data?.message || "Something went wrong.";
+    setError(errorMessage);
+    setMessage(""); // Clear previous success
+  }
+};
 
   
   return (
@@ -86,17 +92,20 @@ const Signup = () => {
 
         <div className="mb-4">
           <label className="text-gray-700 font-medium block mb-1">Fullname</label>
-          <input
-                id="Full Name"
-                name="Full Name"
-                type="text"
-                autoComplete="Full Name"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your Full Name"
-                value={fullName}
-                onChange={handleFullNameChange}
-              />
+<input
+  id="Full Name"
+  name="Full Name"
+  type="text"
+  autoComplete="off"
+  required
+  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+  placeholder="Enter your Full Name"
+  value={fullName}
+  onChange={(e) => {
+    const cleanedValue = e.target.value.replace(/\s+/g, '');
+    handleFullNameChange({ target: { value: cleanedValue } });
+  }}
+/>
         </div>
         {/* Role Dropdown */}
         <div className="mb-4">
@@ -138,17 +147,25 @@ const Signup = () => {
         </div>
         <div className="mb-4">
           <label className="text-gray-700 font-medium block mb-1">Token</label>
-          <input
-                id="Token"
-                name="Token"
-                type="text"
-                autoComplete="Token"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your login token."
-                value={token}
-                onChange={handletokenChange}
-              />
+<input
+  id="Token"
+  name="Token"
+  type="text"
+  inputMode="numeric"
+  pattern="\d{4}"
+  maxLength={4}
+  autoComplete="off"
+  required
+  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+  placeholder="Enter your 4-digit token"
+  value={token}
+  onChange={(e) => {
+    const val = e.target.value;
+    if (/^\d{0,4}$/.test(val)) {
+      handletokenChange(e);
+    }
+  }}
+/>
         </div>
         {/* Create Account Button */}
         <button className="w-full bg-black text-white py-2 rounded font-medium hover:bg-gray-800">
